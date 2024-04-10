@@ -1,7 +1,8 @@
 'use client'
 import React, { useState } from 'react';
 import TableDemo from '../table/table';
-import { ModeToggle } from '../../components/ui/modetoggle';
+import Home from '../navbar/page';
+
 export default function Navbar() {
     const [batch, setBatch] = useState('');
     const [semester, setSemester] = useState('');
@@ -47,6 +48,7 @@ export default function Navbar() {
                         {/* Add more semesters as needed */}
                     </select>
                 </div>
+
                 <button
                     className="bg-white hover:bg-gray-100 text-blue-500 font-semibold py-2 px-4 border border-blue-500 rounded shadow"
                     onClick={handleSubmit}
@@ -54,8 +56,12 @@ export default function Navbar() {
                     Submit
                 </button>
             </div>
+
         </nav>
-            <TableDemo />
+            <div className="flex">
+                <Home/>
+                <TableDemo />
+            </div>
         </>
     );
 }

@@ -22,6 +22,7 @@ import { Student, generateStudents, subjects, calculateGradePoints, calculateGPA
 
 
 
+
 const TableDemo: React.FC = () => {
     const [students, setStudents] = useState(generateStudents(10, subjects.length || 0));
 
@@ -51,8 +52,6 @@ const TableDemo: React.FC = () => {
         }
     };
     
-
-
     return (
         <div>
             <Table>

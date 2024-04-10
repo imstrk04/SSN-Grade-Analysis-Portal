@@ -16,12 +16,12 @@ import {
     AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
-    AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+
 
 
 export function ButtonDemo() {
@@ -35,13 +35,14 @@ export function SelectDemo() {
         router.push('/dashboard');
     };
     const handleContinue = () => {
-        // Navigate to your desired page
         router.push('/add-results');
     };
 
 
     return (
+        
         <div className="relative h-screen">
+
             <div className="flex flex-col md:flex-row justify-center items-center h-full space-y-4 md:space-y-0 md:space-x-8">
                 <Select>
                     <div className="flex justify-center">

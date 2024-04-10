@@ -16,9 +16,15 @@ const config = {
       screens: {
         "2xl": "1400px",
       },
+      
     },
     extend: {
       colors: {
+        'body-bg-color': '#dce4e3',
+        'green': '#18c29c',
+        'light-green': '#0163af',
+        'light-grey': '#dce4e3',
+        'text-color': '#084236',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

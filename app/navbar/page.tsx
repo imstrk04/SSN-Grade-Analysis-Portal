@@ -1,99 +1,98 @@
 'use client'
-import React, { useContext, createContext, useState, ReactNode } from 'react';
-import { MoreVertical, ChevronLast, ChevronFirst } from 'lucide-react';
+import Head from 'next/head'
+import { MenuIcon } from '@heroicons/react/outline'
+import { useState } from 'react'
+import {
+    MdOutlineSpaceDashboard,
+    MdOutlineAnalytics,
+} from "react-icons/md";
+import { AiOutlineStop } from "react-icons/ai";
+import { useRouter } from 'next/navigation';
 
-interface SidebarContextType {
-    expanded: boolean;
-    showContent: boolean;
-    toggleContent: () => void;
-}
-
-const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
-
-interface SidebarProps {
-    children: ReactNode;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ children }) => {
-    const [expanded, setExpanded] = useState<boolean>(true);
-    const [showContent, setShowContent] = useState<boolean>(false);
-
-    const toggleContent = () => {
-        setShowContent(!showContent);
+export default function Home() {
+    const [active, setActive] = useState(false)
+    const router = useRouter();
+    function toggleSidebar() {
+        setActive(!active)
+    }
+    const handleClick = () => {
+        router.push('/');
+    };
+    const handleContinue = () => {
+        router.push('/add-results');
+    };
+    
+    const handleClick2 = () => {
+        router.push('/');
+    };
+    const handleClick3 = () => {
+        router.push('/');
     };
 
     return (
-        <aside className="h-screen">
-            <nav className="h-full flex flex-col bg-white border-r shadow-sm">
-                <div className="p-4 pb-2 flex justify-between items-center">
-                    <img
-                        src="https://img.logoipsum.com/243.svg"
-                        className={`overflow-hidden transition-all ${expanded ? 'w-32' : 'w-0'}`}
-                        alt=""
-                    />
-                    <button
-                        onClick={() => setExpanded((curr) => !curr)}
-                        className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100"
-                    >
-                        {expanded ? <ChevronFirst /> : <ChevronLast />}
-                    </button>
-                </div>
+        <div className="flex min-h-screen text-text-color">
+            <Head>
+                <title>Sidebar</title>
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
 
-                <SidebarContext.Provider value={{ expanded, showContent, toggleContent }}>
-                    <ul className="flex-1 px-3">
-                        {children}
-                        {showContent && <li>Additional content</li>}
-                    </ul>
-                </SidebarContext.Provider>
+            <aside className={`
+        transition-all duration-300
+    flex flex-col items-center justify-between bg-white
+    ${active ? 'w-64' : 'w-20'}
+    ${active ? 'lg:w-50' : 'lg:w-20'}
+      `}>
+                <div className="p-4 w-full space-y-6">
+                    <div className="flex items-center justify-between">
+                        <img className={`
+              ${active ? 'block' : 'hidden'}
+            `}
+                            src="/assets/logo.svg" />
+                        <button className="p-3 rounded-xl hover:bg-light-green" onClick={toggleSidebar}>
+                            <MenuIcon className="h-6 w-6" />
+                        </button>
+                    </div>
 
-                <div className="border-t flex p-3">
-                    <img
-                        src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
-                        alt=""
-                        className="w-10 h-10 rounded-md"
-                    />
-                    <div className={`flex justify-between items-center overflow-hidden transition-all ${expanded ? 'w-52 ml-3' : 'w-0'}`}>
-                        <div className="leading-4">
-                            <h4 className="font-semibold">John Doe</h4>
-                            <span className="text-xs text-gray-600">johndoe@gmail.com</span>
-                        </div>
-                        <MoreVertical size={20} />
+                    <div className="space-y-3">
+                        <button className="flex w-full p-3 rounded-xl hover:bg-light-green"
+                            onClick={handleClick}>
+                            <MdOutlineSpaceDashboard
+                                className="h-6 w-6" />
+                            <span className={`
+                ml-3
+                ${active ? 'block' : 'hidden'}
+              `}>Dashboard</span>
+                        </button>
+
+
+                        <button className="flex w-full p-3 rounded-xl hover:bg-light-green"onClick={handleContinue}>
+                            <MdOutlineAnalytics className="h-6 w-6"  />
+                            <span className={`
+                ml-3
+                ${active ? 'block' : 'hidden'}
+              `}>Grade Analysis</span>
+                        </button>
+
+                        <button className="flex w-full p-3 rounded-xl hover:bg-light-green" onClick={handleClick2}>
+                            <img className="h-6 w-6" src="/assets/user.svg" />
+                            <span className={`
+                ml-3
+                ${active ? 'block' : 'hidden'}
+              `}>NBA Records</span>
+                        </button>
+
+                        <button className="flex w-full p-3 rounded-xl hover:bg-light-green" onClick={handleClick3}>
+                            <AiOutlineStop className="h-6 w-6" />
+                            <span className={`
+                ml-3
+                ${active ? 'block' : 'hidden'}
+              `}>BackLogs</span>
+                        </button>
                     </div>
                 </div>
-            </nav>
-        </aside>
-    );
-};
-
-interface SidebarItemProps {
-    icon: React.ReactNode;
-    text: string;
-    active?: boolean;
-    alert?: boolean;
+            </aside>
+            <main className="flex flex-grow p-7 bg-body-bg-color">
+            </main>
+        </div>
+    )
 }
-
-export const SidebarItem: React.FC<SidebarItemProps> = ({ icon, text, active, alert }) => {
-    const context = useContext(SidebarContext);
-
-    if (context === undefined) {
-        throw new Error('SidebarItem must be used within a SidebarProvider');
-    }
-
-    const { expanded } = context;
-
-    return (
-        <li className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group ${active ? 'bg-gradient-to-tr from-indigo-200 to-indigo-100 text-indigo-800' : 'hover:bg-indigo-50 text-gray-600'}`}>
-            {icon}
-            <span className={`overflow-hidden transition-all ${expanded ? 'w-52 ml-3' : 'w-0'}`}>{text}</span>
-            {alert && <div className={`absolute right-2 w-2 h-2 rounded bg-indigo-400 ${expanded ? '' : 'top-2'}`} />}
-
-            {!expanded && (
-                <div className={`absolute left-full rounded-md px-2 py-1 ml-6 bg-indigo-100 text-indigo-800 text-sm invisible opacity-20 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0`}>
-                    {text}
-                </div>
-            )}
-        </li>
-    );
-};
-
-export default Sidebar;

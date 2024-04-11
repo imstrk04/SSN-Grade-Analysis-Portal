@@ -91,8 +91,7 @@ export default function Home() {
                     </div>
                 </div>
             </aside>
-            <main className="flex flex-grow p-7 bg-body-bg-color">
-            </main>
+            
         </div>
     )
 }

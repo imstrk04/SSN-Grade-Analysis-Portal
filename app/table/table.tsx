@@ -18,7 +18,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-import { Student, generateStudents, subjects, calculateGradePoints, calculateGPA, calculateDeviation, gradePoints } from './gradesUtils';
+import {  generateStudents, subjects, calculateGradePoints, calculateGPA, calculateDeviation, gradePoints } from './gradesUtils';
 
 
 
@@ -53,7 +53,8 @@ const TableDemo: React.FC = () => {
     };
     
     return (
-        <div>
+
+
             <Table>
                 <TableCaption>A list of your recent Grades</TableCaption>
                 <TableHeader>
@@ -112,7 +113,7 @@ const TableDemo: React.FC = () => {
                     ))}
                 </TableBody>
             </Table>
-        </div>
+
     );
 };
 

@@ -22,7 +22,7 @@ const config = {
       colors: {
         'body-bg-color': '#dce4e3',
         'green': '#18c29c',
-        'light-green': '#0163af',
+        'light-green': '#3b82f6',
         'light-grey': '#dce4e3',
         'text-color': '#084236',
         border: "hsl(var(--border))",
@@ -31,7 +31,7 @@ const config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#3b82f6",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {

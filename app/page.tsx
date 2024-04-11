@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { SelectDemo } from './navbar/select';
 
+
 const IndexPage: React.FC = () => {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -20,7 +21,6 @@ const IndexPage: React.FC = () => {
         <div className="flex-grow p-4">
           <div className="text-gray-800">
             <div className="mb-8">
-              <h1>Student Grade Analysis</h1>
               <SelectDemo />
             </div>
           </div>

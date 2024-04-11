@@ -1,12 +1,12 @@
 import Head from 'next/head'
-import { MenuIcon} from '@heroicons/react/outline'
+import { MenuIcon } from '@heroicons/react/outline'
 import { useState } from 'react'
 import {
   MdOutlineSpaceDashboard,
   MdOutlineAnalytics,
 } from "react-icons/md";
 import { AiOutlineStop } from "react-icons/ai";
-import { SelectDemo } from './select';
+
 
 export default function Home() {
   const [active, setActive] = useState(false)
@@ -16,6 +16,7 @@ export default function Home() {
   }
 
   return (
+
     <div className="flex min-h-screen text-text-color">
       <Head>
         <title>Sidebar</title>
@@ -40,8 +41,8 @@ export default function Home() {
 
           <div className="space-y-3">
             <button className="flex w-full p-3 rounded-xl hover:bg-light-green">
-  <MdOutlineSpaceDashboard
-              className="h-6 w-6"  />
+              <MdOutlineSpaceDashboard
+                className="h-6 w-6" />
               <span className={`
                 ml-3
                 ${active ? 'block' : 'hidden'}
@@ -64,9 +65,9 @@ export default function Home() {
                 ${active ? 'block' : 'hidden'}
               `}>NBA Records</span>
             </button>
-            
+
             <button className="flex w-full p-3 rounded-xl hover:bg-light-green">
-              <AiOutlineStop className="h-6 w-6"  />
+              <AiOutlineStop className="h-6 w-6" />
               <span className={`
                 ml-3
                 ${active ? 'block' : 'hidden'}

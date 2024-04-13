@@ -16,10 +16,10 @@ export default function Home() {
         setActive(!active)
     }
     const handleClick = () => {
-        router.push('/');
+        router.push('/dashboard');
     };
     const handleContinue = () => {
-        router.push('/add-results');
+        router.push('/grade-analysis');
     };
     
     const handleClick2 = () => {

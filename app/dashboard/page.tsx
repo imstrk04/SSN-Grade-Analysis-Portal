@@ -12,6 +12,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
+import Image from "next/image"
+import Link from 'next/link';
 
 export default function Navbar() {
     const [batch, setBatch] = useState('');
@@ -34,7 +36,9 @@ export default function Navbar() {
         <>
             <nav className="bg-blue-500 p-6 shadow-md w-full flex justify-between items-center">
                 <div style={{ marginTop: '5px' }}> {/* Increase margin-top for more space */}
-                    <img src="/assets/logo2.svg" alt="Logo" />
+                    <Link href="/">
+                        <Image src="/assets/logo2.svg" alt="Logo" width={100} height={100} />
+                    </Link>
                 </div>
                 <div className="max-w-7xl mx-auto flex items-center w-full px-2 lg:px-8">
 

@@ -5,7 +5,6 @@ import { useDropzone } from 'react-dropzone';
 import * as XLSX from 'xlsx';
 import { collection, addDoc, Firestore } from 'firebase/firestore';
 import { db } from "@/components/firebase/config"
-import { Button } from '@/components/ui/button';
 interface DataRow {
   [key: string]: any;
 }

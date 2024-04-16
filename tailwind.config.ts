@@ -22,6 +22,7 @@ const config = {
       colors: {
         'body-bg-color': '#dce4e3',
         'green': '#18c29c',
+        
         'light-green': '#3b82f6',
         'light-grey': '#dce4e3',
         'text-color': '#084236',

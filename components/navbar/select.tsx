@@ -96,6 +96,7 @@ export function SelectDemo() {
             </div>
 
             <div className="fixed bottom-0 right-0 mb-4 mr-4 flex">
+                
                 <Button className='max-w-[150px] mr-4'>
                     <Pencil className="mr-2 h-4 w-4 md:h-6 md:w-6" />Add Semester
                 </Button>

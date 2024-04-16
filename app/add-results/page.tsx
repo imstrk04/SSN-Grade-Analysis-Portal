@@ -1,83 +1,86 @@
 'use client'
-import React, { useState } from 'react';
+
+import React, { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
 import * as XLSX from 'xlsx';
+import { collection, addDoc, Firestore } from 'firebase/firestore';
+import { db } from "@/components/firebase/config"
+import { Button } from '@/components/ui/button';
+interface DataRow {
+  [key: string]: any;
+}
 
-const UploadXLSX: React.FC = () => {
-    const [uploadedData, setUploadedData] = useState<any[]>([]);
-    const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false);
+const ExcelUploader: React.FC = () => {
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                if (event.target) {
-                    const data = new Uint8Array(event.target.result as ArrayBuffer);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0]; // assuming we're using the first sheet
-                    const sheet = workbook.Sheets[sheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                    setUploadedData(jsonData);
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-    };
+  const handleUploadFileToDB = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles && acceptedFiles.length > 0) {
+      acceptedFiles.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (evt: ProgressEvent<FileReader>) => {
+          const bstr = evt.target?.result;
+          if (typeof bstr === "string") {
+            const wb = XLSX.read(bstr, { type: 'binary' });
 
-    const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDraggingOver(true);
-    };
+            // Process each sheet
+            const sheets = wb.SheetNames.map(name => ({ name, data: XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1 }) }));
 
-    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDraggingOver(false);
-    };
+            for (const { name, data } of sheets) {
+              const tableName = name.toLowerCase();
+              populateTable(data, tableName);
+            }
 
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDraggingOver(false);
-        const file = e.dataTransfer.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                if (event.target) {
-                    const data = new Uint8Array(event.target.result as ArrayBuffer);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0]; // assuming we're using the first sheet
-                    const sheet = workbook.Sheets[sheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                    setUploadedData(jsonData);
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-    };
+            setIsSubmitted(true);
+          }
+        };
+        reader.readAsBinaryString(file);
+      });
+    } else {
+      console.log("No files dropped");
+    }
+  }, []);
 
-    return (
-        <div>
-            <input
-                type="file"
-                accept=".xlsx"
-                onChange={handleFileUpload}
-            />
-            <div
-                style={{ border: '2px dashed black', padding: '20px', marginTop: '20px' }}
-                onDragEnter={handleDragEnter}
-                onDragOver={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-            >
-                <p>Drag and drop XLSX file here</p>
-            </div>
-            {uploadedData.length > 0 && (
-                <div>
-                    <h2>Uploaded Data:</h2>
-                    <pre>{JSON.stringify(uploadedData, null, 2)}</pre>
-                </div>
-            )}
-        </div>
-    );
+  const populateTable = async (data: any[], tableName: string) => {
+    let targetTableName: string = tableName; // Declare targetTableName here
+
+    try {
+      console.log(`Adding data to collection: ${tableName}`);
+      console.log("Data received:", data); // Log the data to check its structure
+
+      const tableRef = collection(db as Firestore, targetTableName);
+      const headers = data[0] as string[];
+
+      for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        const rowData: DataRow = {};
+        headers.forEach((header, index) => {
+          rowData[header] = row[index];
+        });
+        await addDoc(tableRef, rowData);
+      }
+      console.log(`${targetTableName} records added successfully.`);
+    } catch (error) {
+      console.error(`Error adding ${targetTableName} records:`, error);
+    }
+  };
+
+  const { getRootProps, getInputProps } = useDropzone({ onDrop: handleUploadFileToDB });
+
+  return (
+    <div className="flex flex-col items-center justify-center p-6 bg-white shadow-lg rounded-lg">
+    <h1 className="text-xl font-bold text-gray-800 mb-6">Upload Your Grades Here</h1>
+    <div {...getRootProps({ className: "dropzone" })}>
+        <button className="relative bg-blue-600 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 shadow-xl">
+            Upload File
+            <input {...getInputProps()} className="hidden" />
+            <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-300 rounded-lg opacity-50 hover:opacity-75 transition duration-300 ease-in-out"></div>
+        </button>
+    </div>
+    {isSubmitted && <p className="text-green-600 mt-4 font-semibold">File submitted successfully!</p>}
+</div>
+
+
+  );
 };
 
-export default UploadXLSX;
+export default ExcelUploader;

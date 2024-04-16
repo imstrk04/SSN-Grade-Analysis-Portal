@@ -1,7 +1,7 @@
 'use client'
-import React, { useState } from 'react';
-import TableDemo from '../table/table';
-import Home from '../navbar/page';
+import React, { useState, useEffect } from 'react';
+import TableDemo from '../../components/table/table';
+import Home from '../../components/navbar/page';
 import {
     Select,
     SelectContent,
@@ -14,23 +14,32 @@ import {
 import { Button } from '@/components/ui/button';
 import Image from "next/image"
 import Link from 'next/link';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '@/components/firebase/config';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
     const [batch, setBatch] = useState('');
     const [semester, setSemester] = useState('');
+    const [user] = useAuthState(auth);
+    const router = useRouter();
 
-    const handleBatchChange = (event) => {
-        setBatch(event.target.value);
-    };
+    useEffect(() => {
+        if (!user) {
+            router.push('/sign-in');
+        }
+    }, [user, router]);
 
-    const handleSemesterChange = (event) => {
-        setSemester(event.target.value);
-    };
+    if (!user) {
+        return null; // Or you can return a loading indicator or a message
+    }
 
     const handleSubmit = () => {
         console.log('Batch:', batch);
         console.log('Semester:', semester);
     };
+
+    
 
     return (
         <>
@@ -78,7 +87,7 @@ export default function Navbar() {
                             </SelectContent>
                         </Select>
 
-                        <Button style={{ backgroundColor: '#1800f0', borderColor: '#1800f0' }} className="text-white hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition duration-150 ease-in-out">
+                        <Button onClick={handleSubmit} style={{ backgroundColor: '#1800f0', borderColor: '#1800f0' }} className="text-white hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition duration-150 ease-in-out">
                             Submit
                         </Button>
                     </div>

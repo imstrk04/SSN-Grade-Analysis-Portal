@@ -1,8 +1,11 @@
 'use client'
-
 import React, { useEffect } from 'react';
-import { SelectDemo } from './navbar/select';
-
+import { SelectDemo } from '../components/navbar/select';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '@/components/firebase/config';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
+import { Button } from '@/components/ui/button';
 
 const IndexPage: React.FC = () => {
   useEffect(() => {
@@ -12,16 +15,39 @@ const IndexPage: React.FC = () => {
     };
   }, []);
 
+  const [user] = useAuthState(auth);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Ensure session storage is available before accessing it
+    if (typeof window !== 'undefined') {
+      const userSession = sessionStorage.getItem('user');
+      if (!user && !userSession) {
+        router.push('/sign-in');
+      }
+    }
+  }, [user, router]);
+
   return (
     <div className="flex flex-col h-screen">
-
       <div className="flex flex-grow">
         <div className="w-1/4 border-l-8 border-blue-500 bg-blue-500 p-4 transition-all duration-300 transform hover:scale-105">
         </div>
-        <div className="flex-grow p-4">
+        <div className="flex-grow p-4 relative">
           <div className="text-gray-800">
             <div className="mb-8">
               <SelectDemo />
+              <Button
+                onClick={() => {
+                  signOut(auth);
+                  if (typeof window !== 'undefined') {
+                    sessionStorage.removeItem('user');
+                  }
+                }}
+                className="absolute top-0 right-0 mt-2 mr-2"
+              >
+                Log Out
+              </Button>
             </div>
           </div>
         </div>

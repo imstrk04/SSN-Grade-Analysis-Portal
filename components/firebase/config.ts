@@ -1,6 +1,5 @@
 import { initializeApp,getApp,getApps } from "firebase/app";
 import {getAuth} from "firebase/auth"
-import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey:process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -15,5 +14,4 @@ const firebaseConfig = {
 // sourcery skip: invert-ternary
 const app = !getApps().length ? initializeApp(firebaseConfig):getApp()
 const auth=getAuth(app)
-const db=getFirestore(app);
-export {app,auth,db}
+export {app,auth}

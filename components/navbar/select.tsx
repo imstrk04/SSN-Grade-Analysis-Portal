@@ -35,7 +35,10 @@ export function SelectDemo() {
         router.push('/dashboard');
     };
     const handleContinue = () => {
-        router.push('/add-results');
+        router.push('/add-result');
+    };
+    const handleContinue1 = () => {
+        router.push('/add-batch');
     };
     const words = [
         {
@@ -96,27 +99,47 @@ export function SelectDemo() {
             </div>
 
             <div className="fixed bottom-0 right-0 mb-4 mr-4 flex">
-                
-                <Button className='max-w-[150px] mr-4'>
-                    <Pencil className="mr-2 h-4 w-4 md:h-6 md:w-6" />Add Semester
-                </Button>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button className='max-w-[150px] flex items-center'>
-                            <Pencil className='mr-2 h-4 w-4 md:h-6 md:w-6' />Add Batch
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Do you want to Add New Batch Semester Results?</AlertDialogTitle>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleContinue}>Continue</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+
+                <div style={{ marginRight: '10px' }}>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button className='max-w-[150px] flex items-center'>
+                                <Pencil className='mr-2 h-4 w-4 md:h-6 md:w-6' />Add Batch
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Do you want to Add New Batch?</AlertDialogTitle>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleContinue1}>Continue</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+
+                <div style={{ marginLeft: '10px' }}>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button className='max-w-[150px] flex items-center'>
+                                <Pencil className='mr-2 h-4 w-4 md:h-6 md:w-6' />Add Results
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Do you want to Add New Semester Results?</AlertDialogTitle>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleContinue}>Continue</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
             </div>
+
+
         </div>
     );
 }

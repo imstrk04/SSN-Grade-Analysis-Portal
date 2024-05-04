@@ -23,7 +23,7 @@ export default function Home() {
     };
     
     const handleClick2 = () => {
-        router.push('/');
+        router.push('/nba');
     };
     const handleClick3 = () => {
         router.push('/');

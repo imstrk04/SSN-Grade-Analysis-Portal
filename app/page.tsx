@@ -6,6 +6,8 @@ import { auth } from '@/components/firebase/config';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
+import Navbar from './dashboard/page';
+import Home from '@/components/navbar/page';
 
 const IndexPage: React.FC = () => {
   useEffect(() => {
@@ -31,8 +33,7 @@ const IndexPage: React.FC = () => {
   return (
     <div className="flex flex-col h-screen">
       <div className="flex flex-grow">
-        <div className="w-1/4 border-l-8 border-blue-500 bg-blue-500 p-4 transition-all duration-300 transform hover:scale-105">
-        </div>
+      <Home/>
         <div className="flex-grow p-4 relative">
           <div className="text-gray-800">
             <div className="mb-8">

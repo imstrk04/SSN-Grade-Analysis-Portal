@@ -4,7 +4,6 @@ import React from 'react';
 import Image from "next/image";
 import Link from 'next/link';
 import Home from '../../components/navbar/page';
-import { Button } from '@/components/ui/button';
 import Table1 from './table1';
 import Table2 from './table2';
 

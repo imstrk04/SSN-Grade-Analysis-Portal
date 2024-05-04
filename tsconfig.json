@@ -21,6 +21,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/SideNavbar.tsx", "app/jello/page.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/SideNavbar.tsx", "app/jello/page.tsx", "app/add-result/page2.tsx", "components/firebase/config.ts", "components/firebase/firebase.js"],
   "exclude": ["node_modules"]
 }

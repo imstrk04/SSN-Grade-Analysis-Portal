@@ -1,15 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { db } from '../../components/firebase/config';
 import { collection, getDocs, query } from 'firebase/firestore';
 
-interface Table2Data {
-    totalStudents: number;
-    studentsWithClearedBacklogs: number;
-}
-
-const Table2: React.FC = () => {
-    const [table2Data, setTable2Data] = useState<{[batch: string]: Table2Data}>({});
+const Table2 = () => {
+    const [table2Data, setTable2Data] = useState({});
 
     useEffect(() => {
         const fetchTableData = async () => {
@@ -17,15 +11,9 @@ const Table2: React.FC = () => {
                 const studentDetailsSnapshot = await getDocs(query(collection(db, 'student-details')));
                 const resultDetailsSnapshot = await getDocs(query(collection(db, 'result-details')));
 
-                const batches: string[] = [];
-                studentDetailsSnapshot.docs.forEach(doc => {
-                    const batch = doc.data().Batch;
-                    if (!batches.includes(batch)) {
-                        batches.push(batch);
-                    }
-                });
+                const batches = Array.from(new Set(studentDetailsSnapshot.docs.map(doc => doc.data().Batch)));
 
-                const dataByBatch: {[batch: string]: Table2Data} = {};
+                const dataByBatch = {};
 
                 for (const batch of batches) {
                     const studentsInBatch = studentDetailsSnapshot.docs.filter(doc => doc.data().Batch === batch);
@@ -33,9 +21,7 @@ const Table2: React.FC = () => {
 
                     const studentsWithClearedBacklogs = studentsInBatch.filter(studentDoc => {
                         const studentRegisterNo = studentDoc.data().RegisterNo;
-                        return resultDetailsSnapshot.docs.some(resultDoc => {
-                            return resultDoc.data().RegisterNo === studentRegisterNo && resultDoc.data().Grade !== "RA";
-                        });
+                        return resultDetailsSnapshot.docs.some(resultDoc => resultDoc.data().RegisterNo === studentRegisterNo && resultDoc.data().Grade !== "RA");
                     });
 
                     const studentsWithClearedBacklogsCount = studentsWithClearedBacklogs.length;

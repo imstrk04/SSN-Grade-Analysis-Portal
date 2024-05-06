@@ -1,16 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { db } from '../../components/firebase/config';
 import { collection, getDocs, query } from 'firebase/firestore';
 
-interface Table1Data {
-    totalStudents: number;
-    studentsWithoutBacklogs: number;
-}
-
-const Table1: React.FC = () => {
-    const [table1Data, setTable1Data] = useState<{[batch: string]: Table1Data}>({});
-    const [loading, setLoading] = useState<boolean>(true);
+const Table1 = () => {
+    const [table1Data, setTable1Data] = useState({});
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchTableData = async () => {
@@ -21,24 +15,16 @@ const Table1: React.FC = () => {
                 const studentDetails = studentDetailsSnapshot.docs.map(doc => doc.data());
                 const resultDetails = resultDetailsSnapshot.docs.map(doc => doc.data());
 
-                const batches: string[] = [];
-                studentDetails.forEach(data => {
-                    const batch = data.Batch;
-                    if (!batches.includes(batch)) {
-                        batches.push(batch);
-                    }
-                });
+                const batches = Array.from(new Set(studentDetails.map(data => data.Batch)));
 
-                const dataByBatch: {[batch: string]: Table1Data} = {};
+                const dataByBatch = {};
 
                 for (const batch of batches) {
                     const studentsInBatch = studentDetails.filter(data => data.Batch === batch);
                     const totalStudents = studentsInBatch.length;
 
                     const studentsWithNoBacklogs = studentsInBatch.filter(student => {
-                        const hasBacklogs = resultDetails.some(result => {
-                            return result.RegisterNo === student.RegisterNo && result.Grade === "RA";
-                        });
+                        const hasBacklogs = resultDetails.some(result => result.RegisterNo === student.RegisterNo && result.Grade === 'RA');
                         return !hasBacklogs;
                     });
 
@@ -57,9 +43,9 @@ const Table1: React.FC = () => {
         fetchTableData();
     }, []);
 
-    const calculateYearInBatch = (startYear: number, currentYear: number): number => {
+    const calculateYearInBatch = (startYear, currentYear) => {
         const yearsSinceStart = currentYear - startYear + 1;
-        return Math.min(yearsSinceStart, 4); 
+        return Math.min(yearsSinceStart, 4);
     };
 
     if (loading) {
@@ -86,7 +72,7 @@ const Table1: React.FC = () => {
                 </thead>
                 <tbody>
                     {Object.keys(table1Data).map(batch => {
-                        const yearCounts: {[year: string]: number} = {
+                        const yearCounts = {
                             "Year 1": 0,
                             "Year 2": 0,
                             "Year 3": 0,

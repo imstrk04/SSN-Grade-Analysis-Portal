@@ -8,7 +8,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { db } from '@/components/firebase/config';
+import db from '@/components/firebase/config';
 import { collection, getDocs } from 'firebase/firestore';
 
 interface ResultDetail {

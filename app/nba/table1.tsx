@@ -1,65 +1,86 @@
-
 import React, { useState, useEffect } from 'react';
-import { db } from '../../components/firebase/config';
-import { collection, getDocs, query } from 'firebase/firestore';
+import db from "@/components/firebase/firebase.js";
+import { ref, get, getDatabase } from 'firebase/database'; 
 
 interface Table1Data {
     totalStudents: number;
-    studentsWithoutBacklogs: number;
+    studentsWithoutBacklogs: number[];
 }
 
 const Table1: React.FC = () => {
-    const [table1Data, setTable1Data] = useState<{[batch: string]: Table1Data}>({});
+    const [table1Data, setTable1Data] = useState<{ [batch: string]: Table1Data }>({});
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchTableData = async () => {
             try {
-                const studentDetailsSnapshot = await getDocs(query(collection(db, 'student-details')));
-                const resultDetailsSnapshot = await getDocs(query(collection(db, 'result-details')));
+                const database = getDatabase();
+                const studentDetailsRef = ref(database, 'students details');
+                const resultDetailsRef = ref(database, 'sheet1');
 
-                const studentDetails = studentDetailsSnapshot.docs.map(doc => doc.data());
-                const resultDetails = resultDetailsSnapshot.docs.map(doc => doc.data());
+                const [studentDetailsSnapshot, resultDetailsSnapshot] = await Promise.all([
+                    get(studentDetailsRef),
+                    get(resultDetailsRef)
+                ]);
 
-                const batches: string[] = [];
-                studentDetails.forEach(data => {
-                    const batch = data.Batch;
-                    if (!batches.includes(batch)) {
-                        batches.push(batch);
-                    }
-                });
+                const studentDetails = studentDetailsSnapshot.val(); // Convert the snapshot to data
+                const resultDetails = resultDetailsSnapshot.val(); // Convert the snapshot to data
 
-                const dataByBatch: {[batch: string]: Table1Data} = {};
+                console.log(studentDetails)
+
+                const batches: string[] = Object.keys(studentDetails || {}); // Extract batch keys
+
+                const dataByBatch: { [batch: string]: Table1Data } = {};
 
                 for (const batch of batches) {
-                    const studentsInBatch = studentDetails.filter(data => data.Batch === batch);
-                    const totalStudents = studentsInBatch.length;
+                    const studentsInBatch = studentDetails[batch] || {}; // Get students for the batch
+                    const totalStudents = Object.keys(studentsInBatch).length; // Count students
 
-                    const studentsWithNoBacklogs = studentsInBatch.filter(student => {
-                        const hasBacklogs = resultDetails.some(result => {
-                            return result.RegisterNo === student.RegisterNo && result.Grade === "RA";
+                    const studentsWithoutBacklogs: number[] = [0, 0, 0, 0]; // Initialize array for each year
+
+                    Object.values(studentsInBatch).forEach(student => {
+                        const registerNo = student.RegisterNo;
+                        const hasBacklogs = Object.values(resultDetails).some((result: any) => {
+                            return result.RegisterNo === registerNo && result.Grade === "RA";
                         });
-                        return !hasBacklogs;
+                        
+                        if (!hasBacklogs) {
+                            const semester = calculateSemester(resultDetails[registerNo].ClearedBy);
+                            const yearInBatch = calculateYearInBatch(batch, semester);
+                            studentsWithoutBacklogs[yearInBatch - 1]++;
+                        }
                     });
-
-                    const studentsWithoutBacklogs = studentsWithNoBacklogs.length;
 
                     dataByBatch[batch] = { totalStudents, studentsWithoutBacklogs };
                 }
+                console.log('Data fetched successfully:', dataByBatch);
 
                 setTable1Data(dataByBatch);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching data:', error);
+                setLoading(false);
             }
         };
 
         fetchTableData();
     }, []);
 
-    const calculateYearInBatch = (startYear: number, currentYear: number): number => {
-        const yearsSinceStart = currentYear - startYear + 1;
-        return Math.min(yearsSinceStart, 4); 
+    const calculateYearInBatch = (batch: string, semester: string): number => {
+        const [startYear] = batch.split(" - ");
+        const currentYear = new Date().getFullYear();
+        const yearsSinceStart = currentYear - parseInt(startYear) + 1;
+        let yearInBatch = Math.ceil(yearsSinceStart / 2); // Divide by 2 semesters per year
+        if (semester === "sem 1") {
+            yearInBatch--;
+        }
+        return Math.min(yearInBatch, 4);
+    };
+
+    const calculateSemester = (clearedBy: string): string => {
+        const clearedDate = new Date(clearedBy);
+        const month = clearedDate.getMonth();
+        return month >= 4 && month <= 10 ? "sem 1" : "sem 2"; // May to November (sem 2), December to April (sem 1)
     };
 
     if (loading) {
@@ -73,7 +94,7 @@ const Table1: React.FC = () => {
                     <tr className="bg-gray-200">
                         <th className="border border-gray-400 px-4 py-2">Batch</th>
                         <th className="border border-gray-400 px-4 py-2">Registered Students</th>
-                        <th className="border border-gray-400 px-4 py-2" colSpan={5}>Students with No Backlogs</th>
+                        <th className="border border-gray-400 px-4 py-2" colSpan={4}>Students with No Backlogs</th>
                     </tr>
                     <tr className="bg-gray-200">
                         <th className="border border-gray-400 px-4 py-2"></th>
@@ -85,37 +106,18 @@ const Table1: React.FC = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {Object.keys(table1Data).map(batch => {
-                        const yearCounts: {[year: string]: number} = {
-                            "Year 1": 0,
-                            "Year 2": 0,
-                            "Year 3": 0,
-                            "Year 4": 0
-                        };
-
-                        const [startYear] = batch.split(" - ");
-                        const startYearNum = parseInt(startYear);
-
-                        const currentYear = new Date().getFullYear();
-                        Object.values(table1Data[batch]).forEach(student => {
-                            const yearInBatch = calculateYearInBatch(startYearNum, currentYear);
-                            yearCounts[`Year ${yearInBatch}`]++;
-                        });
-
-                        return (
-                            <tr key={batch} className="text-center">
-                                <td className="border border-gray-400 px-4 py-2">{batch}</td>
-                                <td className="border border-gray-400 px-4 py-2">{table1Data[batch].totalStudents}</td>
-                                <td className="border border-gray-400 px-4 py-2">{yearCounts["Year 1"]}</td>
-                                <td className="border border-gray-400 px-4 py-2">{yearCounts["Year 2"]}</td>
-                                <td className="border border-gray-400 px-4 py-2">{yearCounts["Year 3"]}</td>
-                                <td className="border border-gray-400 px-4 py-2">{yearCounts["Year 4"]}</td>
-                            </tr>
-                        );
-                    })}
+                    {Object.keys(table1Data).map(batch => (
+                        <tr key={batch} className="text-center">
+                            <td className="border border-gray-400 px-4 py-2">{batch}</td>
+                            <td className="border border-gray-400 px-4 py-2">{table1Data[batch].totalStudents}</td>
+                            {table1Data[batch].studentsWithoutBacklogs.map((count, index) => (
+                                <td key={index} className="border border-gray-400 px-4 py-2">{count}</td>
+                            ))}
+                        </tr>
+                    ))}
                     {Object.keys(table1Data).length === 0 && (
                         <tr>
-                            <td colSpan={7} className="border border-gray-400 px-4 py-2 text-center">No data available</td>
+                            <td colSpan={6} className="border border-gray-400 px-4 py-2 text-center">No data available</td>
                         </tr>
                     )}
                 </tbody>

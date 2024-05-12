@@ -30,7 +30,7 @@ const NewPage: React.FC = () => {
                         <Table1 />
                     </div>
                     <div style={{ margin: '20px 0' }}>
-                        <Table2 />
+                        {/*<Table2 />*/}
                     </div>
                 </div>
             </div>

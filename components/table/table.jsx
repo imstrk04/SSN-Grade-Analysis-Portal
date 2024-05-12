@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
     Table,
     TableBody,
-
     TableCell,
     TableHead,
     TableHeader,
@@ -11,25 +10,18 @@ import {
 import db from '@/components/firebase/config';
 import { collection, getDocs } from 'firebase/firestore';
 
-interface ResultDetail {
-    id: string;
-    Name?: string;
-    RegisterNo?: number;
-    [key: string]: any;
-}
-
-const TableDemo: React.FC = () => {
-    const [userData, setUserData] = useState<ResultDetail[]>([]);
-    const [subjects, setSubjects] = useState<string[]>([]);
+const TableDemo = () => {
+    const [userData, setUserData] = useState([]);
+    const [subjects, setSubjects] = useState([]);
 
     useEffect(() => {
         async function fetchData() {
             try {
                 const querySnapshot = await getDocs(collection(db, "result-details"));
-                const data: ResultDetail[] = [];
+                const data = [];
         
                 querySnapshot.forEach((doc) => {
-                    const resultDetail: ResultDetail = {
+                    const resultDetail = {
                         id: doc.id,
                         Name: doc.data().Name,
                         RegisterNo: doc.data().RegisterNo,

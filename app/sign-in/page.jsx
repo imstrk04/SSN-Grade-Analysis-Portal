@@ -4,14 +4,14 @@ import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import { auth } from '@/components/firebase/config';
 import { useRouter } from 'next/navigation';
 
-const SignIn = (): JSX.Element => {
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
+const SignIn = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [signInWithEmailAndPassword, userError] = useSignInWithEmailAndPassword(auth);
-    const [error, setError] = useState<string>('');
+    const [error, setError] = useState('');
     const router = useRouter();
 
-    const handleSignIn = async (): Promise<void> => {
+    const handleSignIn = async () => {
         try {
             const res = await signInWithEmailAndPassword(email, password);
             console.log({ res });

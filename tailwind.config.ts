@@ -16,23 +16,16 @@ const config = {
       screens: {
         "2xl": "1400px",
       },
-      
     },
     extend: {
       colors: {
-        'body-bg-color': '#dce4e3',
-        'green': '#18c29c',
-        
-        'light-green': '#3b82f6',
-        'light-grey': '#dce4e3',
-        'text-color': '#084236',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#3b82f6",
+          DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {

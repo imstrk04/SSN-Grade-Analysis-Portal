@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import * as XLSX from 'xlsx';
-import { getDatabase, ref, push } from 'firebase/database';
+import { getDatabase, ref, push, get, child } from 'firebase/database';
 import db from '@/components/firebase/firebase';
 
 const ExcelUploader = () => {
@@ -35,59 +35,98 @@ const ExcelUploader = () => {
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop: handleUploadFileToDB });
 
+  // Helper function to convert Excel date serial number to a JavaScript Date object
+  const excelDateToJSDate = (serial) => {
+    const utc_days = Math.floor(serial - 25569);
+    const utc_value = utc_days * 86400;
+    const date_info = new Date(utc_value * 1000);
+
+    const fractional_day = serial - Math.floor(serial) + 0.0000001;
+    let total_seconds = Math.floor(86400 * fractional_day);
+
+    const seconds = total_seconds % 60;
+    total_seconds -= seconds;
+
+    const hours = Math.floor(total_seconds / (60 * 60));
+    const minutes = Math.floor(total_seconds / 60) % 60;
+
+    return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
+  };
+
+  // Helper function to format JavaScript Date object to "MMM YYYY" string
+  const formatDateToMonthYear = (date) => {
+    const options = { year: 'numeric', month: 'short' };
+    return date.toLocaleDateString('en-US', options);
+  };
+
   const populateTable = async (data, tableName) => {
     try {
       // Get a reference to the Firebase Realtime Database
       const database = getDatabase();
-  
       // Get a reference to the specific table (node) in the Realtime Database
       const tableRef = ref(database, tableName);
-  
+
       // Extract column names from the header row
       const columnNames = data[0];
-  
+
       // Find the indices of "Register No.", "Name", and "ClearedBy" columns
       const registerNoIndex = columnNames.indexOf("Register No.");
       const nameIndex = columnNames.indexOf("Name");
       const clearedByIndex = columnNames.indexOf("ClearedBy");
-  
+
+      // Retrieve existing data
+      const snapshot = await get(child(ref(database), tableName));
+      const existingData = snapshot.val() || {};
+
       // Iterate over each row (excluding the header row)
       for (let i = 1; i < data.length; i++) {
         const row = data[i];
         const registerNo = row[registerNoIndex];
         const name = row[nameIndex];
-        const clearedBy = row[clearedByIndex];
-  
-        for (let j = 2; j < columnNames.length - 1; j += 2) {
-          const courseCodeIndex = j;
-          const gradeIndex = j + 1;
-  
-          const courseCode = columnNames[courseCodeIndex];
-          const grade = row[gradeIndex];
-  
-          // Handle empty values
-          const normalizedGrade = grade || "None";
-  
-          // Construct the object with the desired format
-          const rowData = {
-            "RegisterNo": registerNo || "None",
-            "Name": name || "None",
-            "CourseCode": courseCode || "None",
-            "Grade": normalizedGrade,
-            "ClearedBy": clearedBy || "None"
-          };
-  
-          // Push the row data to the Realtime Database
-          await push(tableRef, rowData);
+        const clearedBySerial = row[clearedByIndex];
+
+        let clearedBy = "None";
+        if (!isNaN(clearedBySerial)) {
+          const clearedByDate = excelDateToJSDate(clearedBySerial);
+          clearedBy = formatDateToMonthYear(clearedByDate);
+        }
+
+        // Iterate over all columns to find course codes and grades
+        for (let j = 0; j < columnNames.length; j++) {
+          if (j !== registerNoIndex && j !== nameIndex && j !== clearedByIndex) {
+            const courseCode = columnNames[j];
+            const grade = row[j];
+
+            // Handle empty values
+            const normalizedGrade = grade || "None";
+
+            // Construct the object with the desired format
+            const rowData = {
+              "RegisterNo": registerNo || "None",
+              "Name": name || "None",
+              "CourseCode": courseCode || "None",
+              "Grade": normalizedGrade,
+              "ClearedBy": clearedBy || "None"
+            };
+
+            // Check if the record already exists
+            const exists = Object.values(existingData).some(record =>
+              record.RegisterNo === rowData.RegisterNo && record.CourseCode === rowData.CourseCode
+            );
+
+            if (!exists) {
+              // Push the row data to the Realtime Database
+              await push(tableRef, rowData);
+            }
+          }
         }
       }
-  
+
       console.log(`${tableName} records added successfully to Realtime Database.`);
     } catch (error) {
       console.error(`Error adding ${tableName} records to Realtime Database:`, error);
     }
   };
-  
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
@@ -128,218 +167,3 @@ const ExcelUploader = () => {
 };
 
 export default ExcelUploader;
-
-
-
-
-// import React, { useState, useCallback } from 'react';
-// import { useDropzone } from 'react-dropzone';
-// import * as XLSX from 'xlsx';
-// import { getDatabase, ref, push } from 'firebase/database';
-// import db from '@/components/firebase/firebase';
-
-// const ExcelUploader = () => {
-//   const [isSubmitted, setIsSubmitted] = useState(false);
-
-//   const handleUploadFileToDB = useCallback((acceptedFiles) => {
-//     if (acceptedFiles && acceptedFiles.length > 0) {
-//       acceptedFiles.forEach((file) => {
-//         const reader = new FileReader();
-//         reader.onload = (evt) => {
-//           const bstr = evt.target.result;
-//           const wb = XLSX.read(bstr, { type: 'binary' });
-
-//           // Process each sheet
-//           wb.SheetNames.forEach((sheetName) => {
-//             const data = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
-//             const tableName = sheetName.toLowerCase(); // Adjust this mapping as needed
-//             populateTable(data, tableName);
-//           });
-
-//           setIsSubmitted(true);
-//         };
-//         reader.readAsArrayBuffer(file); // Use readAsArrayBuffer instead of readAsBinaryString
-//       });
-//     } else {
-//       console.log("No files dropped");
-//     }
-//   }, []);
-
-//   const { getRootProps, getInputProps } = useDropzone({ onDrop: handleUploadFileToDB });
-
-//   const populateTable = async (data, tableName) => {
-//     try {
-//       // Get a reference to the Firebase Realtime Database
-//       const database = getDatabase();
-  
-//       // Get a reference to the specific table (node) in the Realtime Database
-//       const tableRef = ref(database, tableName);
-  
-//       // Extract column names from the header row
-//       const columnNames = data[0];
-  
-//       // Find the indices of "Register No.", "Name", and "ClearedBy" columns
-//       const registerNoIndex = columnNames.indexOf("Register No.");
-//       const nameIndex = columnNames.indexOf("Name");
-//       const clearedByIndex = columnNames.indexOf("ClearedBy");
-  
-//       // Iterate over each row (excluding the header row)
-//       for (let i = 1; i < data.length; i++) {
-//         const row = data[i];
-//         const registerNo = row[registerNoIndex];
-//         const name = row[nameIndex];
-//         const clearedBy = row[clearedByIndex];
-  
-//         // Extract course code and grade dynamically
-//         for (let j = 2; j < columnNames.length - 1; j += 2) {
-//           const courseCodeIndex = j;
-//           const gradeIndex = j + 1;
-  
-//           const courseCode = columnNames[courseCodeIndex];
-//           const grade = row[gradeIndex];
-  
-//           // Handle empty values
-//           const normalizedGrade = grade || "None";
-  
-//           // Construct the object with the desired format
-//           const rowData = {
-//             "RegisterNo": registerNo || "None",
-//             "Name": name || "None",
-//             "CourseCode": courseCode || "None",
-//             "Grade": normalizedGrade,
-//             "ClearedBy": clearedBy || "None"
-//           };
-  
-//           // Push the row data to the Realtime Database
-//           await push(tableRef, rowData);
-//         }
-//       }
-  
-//       console.log(`${tableName} records added successfully to Realtime Database.`);
-//     } catch (error) {
-//       console.error(`Error adding ${tableName} records to Realtime Database:`, error);
-//     }
-//   };
-
-
-//   return (
-//     <div>
-//       <h1 className='upload-text'><b>Upload Your Grades Here</b></h1>
-//       <div {...getRootProps()}>
-//         <button className="upload-button" style={{ backgroundColor: 'blue', color: 'white', padding: '10px', borderRadius: '5px', border: 'none' }} component="label">
-//           Upload File
-//           <input {...getInputProps()} style={{ display: 'none' }} />
-//         </button>
-//       </div>
-//       {isSubmitted && <p className='file-submitted'>File submitted successfully!</p>}
-//     </div>
-//   );
-// };
-
-// export default ExcelUploader;
-
-
-
-
-// import React, { useState, useCallback } from 'react';
-// import { useDropzone } from 'react-dropzone';
-// import * as XLSX from 'xlsx';
-// import { getDatabase, ref, push } from 'firebase/database';
-// import db from '../config/firebase.js';
-
-// const ExcelUploader = () => {
-//   const [isSubmitted, setIsSubmitted] = useState(false);
-
-//   const handleUploadFileToDB = useCallback((acceptedFiles) => {
-//     if (acceptedFiles && acceptedFiles.length > 0) {
-//       acceptedFiles.forEach((file) => {
-//         const reader = new FileReader();
-//         reader.onload = (evt) => {
-//           const bstr = evt.target.result;
-//           const wb = XLSX.read(bstr, { type: 'binary' });
-
-//           // Process each sheet
-//           wb.SheetNames.forEach((sheetName) => {
-//             const data = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
-//             const tableName = sheetName.toLowerCase(); // Adjust this mapping as needed
-//             populateTable(data, tableName);
-//           });
-
-//           setIsSubmitted(true);
-//         };
-//         reader.readAsArrayBuffer(file); // Use readAsArrayBuffer instead of readAsBinaryString
-//       });
-//     } else {
-//       console.log("No files dropped");
-//     }
-//   }, []);
-
-//   const { getRootProps, getInputProps } = useDropzone({ onDrop: handleUploadFileToDB });
-
-//   const populateTable = async (data, tableName) => {
-//     try {
-//       // Get a reference to the Firebase Realtime Database
-//       const database = getDatabase();
-  
-//       // Get a reference to the specific table (node) in the Realtime Database
-//       const tableRef = ref(database, tableName);
-  
-//       // Extract column names from the header row
-//       const columnNames = data[0];
-  
-//       // Find the indices of "Register No.", "Name", and "ClearedBy" columns
-//       const registerNoIndex = columnNames.indexOf("Register No.");
-//       const nameIndex = columnNames.indexOf("Name");
-//       const clearedByIndex = columnNames.indexOf("ClearedBy");
-  
-//       // Iterate over each row (excluding the header row)
-//       for (let i = 1; i < data.length; i++) {
-//         const row = data[i];
-//         const registerNo = row[registerNoIndex];
-//         const name = row[nameIndex];
-//         const clearedBy = row[clearedByIndex];
-  
-//         // Extract course code and grade dynamically
-//         for (let j = 2; j < row.length - 1; j += 2) {
-//           const courseCodeIndex = j;
-//           const gradeIndex = j + 1;
-  
-//           const courseCode = columnNames[courseCodeIndex];
-//           const grade = row[gradeIndex];
-  
-//           // Construct the object with the desired format
-//           const rowData = {
-//             "RegisterNo": registerNo,
-//             "Name": name,
-//             "CourseCode": courseCode,
-//             "Grade": grade,
-//             "ClearedBy": clearedBy
-//           };
-  
-//           // Push the row data to the Realtime Database
-//           await push(tableRef, rowData);
-//         }
-//       }
-  
-//       console.log(`${tableName} records added successfully to Realtime Database.`);
-//     } catch (error) {
-//       console.error(`Error adding ${tableName} records to Realtime Database:`, error);
-//     }
-//   };
-  
-
-//   return (
-//     <div>
-//       <h1 className='upload-text'><b>Upload Your Grades Here</b></h1>
-//       <div {...getRootProps()}>
-//         <button className="upload-button" style={{ backgroundColor: 'blue', color: 'white', padding: '10px', borderRadius: '5px', border: 'none' }} component="label">
-//           Upload File
-//           <input {...getInputProps()} style={{ display: 'none' }} />
-//         </button>
-//       </div>
-//       {isSubmitted && <p className='file-submitted'>File submitted successfully!</p>}
-//     </div>
-//   );
-// };
-
-// export default ExcelUploader;

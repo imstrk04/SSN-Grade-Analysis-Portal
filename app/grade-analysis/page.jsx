@@ -1,7 +1,6 @@
-'use client'
+'use client';
 
-
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Select,
     SelectContent,
@@ -20,10 +19,97 @@ import Table3 from './Tables/table3';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/components/firebase/config';
 import { useRouter } from 'next/navigation';
+import { ref, get, child, getDatabase } from 'firebase/database';
+
+const fetchData = async (year, semester, section) => {
+    const dbRef = ref(getDatabase());
+
+    console.log('Fetching data from the database...');
+    const coursesSnapshot = await get(child(dbRef, 'courses'));
+    const studentDetailsSnapshot = await get(child(dbRef, 'students details'));
+    const resultDetailsSnapshot = await get(child(dbRef, 'result details'));
+
+    console.log('Data fetched from database');
+
+    const courses = Object.values(coursesSnapshot.val());
+    const studentDetails = Object.values(studentDetailsSnapshot.val());
+    const resultDetails = Object.values(resultDetailsSnapshot.val());
+
+    console.log('Courses:', courses);
+    console.log('Student Details:', studentDetails);
+    console.log('Result Details:', resultDetails);
+
+    console.log(`Filtering students for batch year: ${year} and section: ${section}`);
+    const filteredStudents = studentDetails.filter(student =>
+        student.Batch === year && (section === 'ALL' || student.Section === section)
+    );
+    console.log('Filtered Students:', filteredStudents);
+
+    if (filteredStudents.length === 0) {
+        console.error('No students found for the specified batch year and section');
+        return [];
+    }
+
+    const semesterNumber = parseInt(semester.substring(semester.length - 1));
+    console.log(`Semester number extracted: ${semesterNumber}`);
+
+    const courseTitleMap = {};
+    courses.forEach(course => {
+        courseTitleMap[course.CourseCode] = course.CourseTitle;
+    });
+
+    console.log('Course Title Map:', courseTitleMap);
+
+    const filteredData = [];
+
+    filteredStudents.forEach(student => {
+        console.log(`Processing results for student: ${student.Name}`);
+        const studentResults = resultDetails.filter(result =>
+            result.RegisterNo === student.RegisterNo &&
+            courses.some(course =>
+                course.CourseCode === result.CourseCode &&
+                getSemester(year, result.ClearedBy) === semesterNumber
+            )
+        );
+
+        console.log('Filtered Results for Student:', studentResults);
+
+        studentResults.forEach(result => {
+            filteredData.push({
+                CourseCode: result.CourseCode,
+                CourseTitle: courseTitleMap[result.CourseCode] || "Unknown Course",
+                Grade: result.Grade
+            });
+        });
+    });
+
+    console.log('Filtered Data:', filteredData);
+    return filteredData;
+};
+
+const getSemester = (year, semester) => {
+    const startYear = parseInt(year.split("-")[0].trim(), 10);
+    const semYear = parseInt(semester.split(" ")[1], 10);
+    const semMon = semester.split(" ")[0];
+
+    let sem = 0;
+
+    if (semMon === "Nov") {
+        sem =  (semYear - startYear) * 2 + 1;
+    } else if (semMon === "Apr") {
+        sem =  (semYear - startYear) * 2;
+    }
+    console.log(sem)
+    return sem
+};
 
 const Grade = () => {
     const [user] = useAuthState(auth);
     const router = useRouter();
+    const [year, setYear] = useState('');
+    const [semester, setSemester] = useState('');
+    const [section, setSection] = useState('');
+    const [data, setData] = useState([]);
 
     useEffect(() => {
         if (!user) {
@@ -32,8 +118,13 @@ const Grade = () => {
     }, [user, router]);
 
     if (!user) {
-        return null; // Or you can return a loading indicator or a message
+        return null;
     }
+
+    const handleSubmit = async () => {
+        const fetchedData = await fetchData(year, semester, section);
+        setData(fetchedData);
+    };
 
     return (
         <>
@@ -46,18 +137,18 @@ const Grade = () => {
                 <div className="max-w-7xl mx-auto flex items-center w-full px-2 lg:px-8">
                     <h1 className="flex-shrink-0 mr-auto"></h1>
                     <div className="flex items-center space-x-4">
-                        <Select>
+                        <Select onValueChange={setYear}>
                             <SelectTrigger className="w-full md:w-[200px] bg-white text-gray-800 rounded-md cursor-pointer">
                                 <SelectValue placeholder="Select academic year" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectItem value="2022-2023">2022-2026</SelectItem>
-                                    <SelectItem value="2023-2024">2023-2027</SelectItem>
+                                    <SelectItem value="2022 - 2026">2022-2026</SelectItem>
+                                    <SelectItem value="2023 - 2027">2023-2027</SelectItem>
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                        <Select>
+                        <Select onValueChange={setSemester}>
                             <SelectTrigger className="w-full md:w-[200px] bg-white text-gray-800 rounded-md cursor-pointer">
                                 <SelectValue placeholder="Select semester" />
                             </SelectTrigger>
@@ -74,7 +165,7 @@ const Grade = () => {
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                        <Select>
+                        <Select onValueChange={setSection}>
                             <SelectTrigger className="w-40 md:w-[200px] bg-white text-gray-800 rounded-md cursor-pointer">
                                 <SelectValue placeholder="Select Section" />
                             </SelectTrigger>
@@ -83,10 +174,15 @@ const Grade = () => {
                                     <SelectItem value="A">Section A</SelectItem>
                                     <SelectItem value="B">Section B</SelectItem>
                                     <SelectItem value="C">Section C</SelectItem>
+                                    <SelectItem value="ALL">Overall</SelectItem>
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                        <Button style={{ backgroundColor: '#1800f0', borderColor: '#1800f0' }} className="text-white hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition duration-150 ease-in-out">
+                        <Button
+                            onClick={handleSubmit}
+                            style={{ backgroundColor: '#1800f0', borderColor: '#1800f0' }}
+                            className="text-white hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition duration-150 ease-in-out"
+                        >
                             Submit
                         </Button>
                     </div>
@@ -97,14 +193,14 @@ const Grade = () => {
                 <div>
                     <div>
                         <h1>Table 1</h1>
-                        <Table1 />
+                        <Table1 data={data} />
                     </div>
                     <div>
                         <h1>Table 2</h1>
-                        <Table2 />
+                        <Table2 data={data} />
                         <div className="mb-4 mt-8">
-                            <h1>Table 4</h1>
-                            <Table3 />
+                            <h1>Table 3</h1>
+                            <Table3 data={data} />
                         </div>
                     </div>
                 </div>

@@ -8,6 +8,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { getDatabase, ref, onValue } from 'firebase/database';
+import { db } from '@/components/firebase/firebase.js'
 
 interface Course {
     CourseCode: string;
@@ -34,26 +35,27 @@ const Table1 = () => {
         const coursesRef = ref(database, 'courses');
         const resultDetailsRef = ref(database, 'result details');
 
-        onValue(coursesRef, (snapshot) => {
-            if (snapshot.exists()) {
-                setCoursesMap(snapshot.val());
+        const fetchData = () => {
+            onValue(coursesRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    setCoursesMap(snapshot.val());
+                } else {
+                    console.log("No data available for courses");
+                }
                 setLoading(false);
-            } else {
-                console.log("No data available for courses");
-                setLoading(false);
-            }
-        });
+            });
 
-        onValue(resultDetailsRef, (snapshot) => {
-            if (snapshot.exists()) {
-                setResultDetails(snapshot.val());
+            onValue(resultDetailsRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    setResultDetails(snapshot.val());
+                } else {
+                    console.log("No data available for result details");
+                }
                 setLoading(false);
-            } else {
-                console.log("No data available for result details");
-                setLoading(false);
-            }
-        });
+            });
+        };
 
+        fetchData();
     }, []);
 
     const calculateStatistics = () => {
@@ -66,7 +68,7 @@ const Table1 = () => {
 
                 const appeared = students.length;
                 const passed = students.filter((student: StudentResult) => student.Grade !== 'U' && student.Grade !== 'R').length;
-                const failed = students.filter((student: StudentResult) => student.Grade === 'U' || student.Grade === 'R').length;
+                const failed = appeared - passed;
                 const passPercentage = appeared !== 0 ? ((passed / appeared) * 100).toFixed(2) + '%' : 'N/A';
 
                 let totalGPA = 0;
@@ -92,6 +94,7 @@ const Table1 = () => {
                             gradeMultiplier = 5;
                             break;
                         default:
+                            gradeMultiplier = 0;
                             break;
                     }
                     totalGPA += gradeMultiplier * course.Credit;

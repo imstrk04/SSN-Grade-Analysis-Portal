@@ -26,7 +26,7 @@ const fetchData = async (year, semester, section) => {
 
     console.log('Fetching data from the database...');
     const coursesSnapshot = await get(child(dbRef, 'courses'));
-    const studentDetailsSnapshot = await get(child(dbRef, 'students details'));
+    const studentDetailsSnapshot = await get(child(dbRef, 'student details'));
     const resultDetailsSnapshot = await get(child(dbRef, 'result details'));
 
     console.log('Data fetched from database');

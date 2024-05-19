@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import * as XLSX from 'xlsx';
-import { getDatabase, ref, update, get, child } from 'firebase/database';
+import { getDatabase, ref, update, get, push } from 'firebase/database';
 import db from '@/components/firebase/firebase';
 
 const ExcelUploader = () => {
@@ -38,13 +38,15 @@ const ExcelUploader = () => {
   const populateStudents = async (data) => {
     try {
       const database = getDatabase();
-      const studentsRef = ref(database, 'students details');
+      const studentsRef = ref(database, 'student details');
 
-      const snapshot = await get(child(studentsRef));
+      const snapshot = await get(studentsRef);
       const existingData = snapshot.val() || {};
 
       for (let i = 1; i < data.length; i++) {
         const [registerNo, name, batch, section] = data[i];
+        if (!registerNo) continue;  // Skip rows with empty register numbers
+
         const studentData = {
           "RegisterNo": registerNo,
           "Name": name,
@@ -54,7 +56,7 @@ const ExcelUploader = () => {
 
         const existingRecordKey = Object.keys(existingData).find(key => existingData[key].RegisterNo === registerNo);
         if (existingRecordKey) {
-          const updateRef = ref(database, `students details/${existingRecordKey}`);
+          const updateRef = ref(db, `students details/${existingRecordKey}`);
           await update(updateRef, studentData);
         } else {
           await push(studentsRef, studentData);

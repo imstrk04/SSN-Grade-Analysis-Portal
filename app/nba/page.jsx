@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react';
 import Image from "next/image";
 import Link from 'next/link';
@@ -7,7 +5,7 @@ import Home from '../../components/navbar/page';
 import Table1 from './table1';
 import Table2 from './table2';
 
-const NewPage: React.FC = () => {
+const NewPage = () => {
     return (
         <>
             <nav className="bg-blue-500 p-6 shadow-md w-full flex justify-between items-center">
@@ -30,7 +28,7 @@ const NewPage: React.FC = () => {
                         <Table1 />
                     </div>
                     <div style={{ margin: '20px 0' }}>
-                        {/*<Table2 />*/}
+                        {/* <Table2 /> */}
                     </div>
                 </div>
             </div>

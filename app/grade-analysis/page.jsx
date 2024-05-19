@@ -96,7 +96,7 @@ const getSemester = (year, semester) => {
 
     if (semMon === "Nov") {
         sem =  (semYear - startYear) * 2 + 1;
-    } else if (semMon === "Apr") {
+    } else if (semMon === "May") {
         sem =  (semYear - startYear) * 2;
     }
     console.log(sem)

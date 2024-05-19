@@ -21,6 +21,7 @@
     "@types/xlsx": "^0.0.35",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "exceljs": "^4.4.0",
     "firebase": "^10.11.0",
     "firebase-admin": "^12.1.0",
     "framer-motion": "^11.0.27",

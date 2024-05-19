@@ -1,3 +1,216 @@
+// 'use client';
+
+// import React, { useState, useEffect } from 'react';
+// import {
+//     Select,
+//     SelectContent,
+//     SelectGroup,
+//     SelectItem,
+//     SelectTrigger,
+//     SelectValue,
+// } from "@/components/ui/select";
+// import { Button } from '@/components/ui/button';
+// import Image from 'next/image';
+// import Link from 'next/link';
+// import Home from '../../components/navbar/page';
+// import Table1 from './Tables/table1';
+// import Table2 from './Tables/table2';
+// import Table3 from './Tables/table3';
+// import { useAuthState } from 'react-firebase-hooks/auth';
+// import { auth } from '@/components/firebase/config';
+// import { useRouter } from 'next/navigation';
+// import { ref, get, child, getDatabase } from 'firebase/database';
+
+// const fetchData = async (year, semester, section) => {
+//     const dbRef = ref(getDatabase());
+
+//     console.log('Fetching data from the database...');
+//     const coursesSnapshot = await get(child(dbRef, 'courses'));
+//     const studentDetailsSnapshot = await get(child(dbRef, 'students details'));
+//     const resultDetailsSnapshot = await get(child(dbRef, 'result details'));
+
+//     console.log('Data fetched from database');
+
+//     const courses = Object.values(coursesSnapshot.val());
+//     const studentDetails = Object.values(studentDetailsSnapshot.val());
+//     const resultDetails = Object.values(resultDetailsSnapshot.val());
+
+//     console.log('Courses:', courses);
+//     console.log('Student Details:', studentDetails);
+//     console.log('Result Details:', resultDetails);
+
+//     console.log(`Filtering students for batch year: ${year} and section: ${section}`);
+//     const filteredStudents = studentDetails.filter(student =>
+//         student.Batch === year && (section === 'ALL' || student.Section === section)
+//     );
+//     console.log('Filtered Students:', filteredStudents);
+
+//     if (filteredStudents.length === 0) {
+//         console.error('No students found for the specified batch year and section');
+//         return { courses: [], results: [] };
+//     }
+
+//     const semesterNumber = parseInt(semester.substring(semester.length - 1));
+//     console.log(`Semester number extracted: ${semesterNumber}`);
+
+//     const courseTitleMap = {};
+//     courses.forEach(course => {
+//         courseTitleMap[course.CourseCode] = course.CourseTitle;
+//     });
+
+//     console.log('Course Title Map:', courseTitleMap);
+
+//     const filteredData = [];
+
+//     filteredStudents.forEach(student => {
+//         console.log(`Processing results for student: ${student.Name}`);
+//         const studentResults = resultDetails.filter(result =>
+//             result.RegisterNo === student.RegisterNo &&
+//             courses.some(course =>
+//                 course.CourseCode === result.CourseCode &&
+//                 getSemester(year, result.ClearedBy) === semesterNumber
+//             )
+//         );
+
+//         console.log('Filtered Results for Student:', studentResults);
+
+//         studentResults.forEach(result => {
+//             filteredData.push({
+//                 CourseCode: result.CourseCode,
+//                 CourseTitle: courseTitleMap[result.CourseCode] || "Unknown Course",
+//                 Grade: result.Grade
+//             });
+//         });
+//     });
+
+//     console.log('Filtered Data:', filteredData);
+//     return { courses, results: filteredData };
+// };
+
+// const getSemester = (year, semester) => {
+//     const startYear = parseInt(year.split("-")[0].trim(), 10);
+//     const semYear = parseInt(semester.split(" ")[1], 10);
+//     const semMon = semester.split(" ")[0];
+
+//     let sem = 0;
+
+//     if (semMon === "Nov") {
+//         sem =  (semYear - startYear) * 2 + 1;
+//     } else if (semMon === "May") {
+//         sem =  (semYear - startYear) * 2;
+//     }
+//     console.log(sem)
+//     return sem
+// };
+
+// const Grade = () => {
+//     const [user] = useAuthState(auth);
+//     const router = useRouter();
+//     const [year, setYear] = useState('');
+//     const [semester, setSemester] = useState('');
+//     const [section, setSection] = useState('');
+//     const [data, setData] = useState({ courses: [], results: [] });
+
+//     useEffect(() => {
+//         if (!user) {
+//             router.push('/sign-in');
+//         }
+//     }, [user, router]);
+
+//     if (!user) {
+//         return null;
+//     }
+
+//     const handleSubmit = async () => {
+//         const fetchedData = await fetchData(year, semester, section);
+//         setData(fetchedData);
+//     };
+
+//     return (
+//         <>
+//             <nav className="bg-blue-500">
+//                 <div className="container mx-auto px-4 py-2">
+//                     <div className="flex items-center justify-between">
+//                         <div className="flex items-center space-x-4">
+//                             <Image
+//                                 src="/images/psg.jpeg"
+//                                 alt="PSG Logo"
+//                                 width={40}
+//                                 height={40}
+//                                 className="h-auto w-auto"
+//                             />
+//                             <Link href="/" legacyBehavior>
+//                                 <a className="text-white text-lg font-semibold">GradeMaster</a>
+//                             </Link>
+//                         </div>
+//                         <Home />
+//                     </div>
+//                 </div>
+//             </nav>
+//             <div className="p-4 flex flex-col items-center justify-center">
+//                 <div className="container mx-auto px-4 py-4">
+//                     <h2 className="text-2xl font-semibold mb-4">Select Year, Semester, and Section</h2>
+//                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+//                         <Select value={year} onValueChange={setYear}>
+//                             <SelectTrigger className="w-full">
+//                                 <SelectValue placeholder="Select Year" />
+//                             </SelectTrigger>
+//                             <SelectContent>
+//                                 <SelectGroup>
+//                                     <SelectItem value="2020-2021">2020-2021</SelectItem>
+//                                     <SelectItem value="2021-2022">2021-2022</SelectItem>
+//                                     <SelectItem value="2022-2023">2022-2023</SelectItem>
+//                                 </SelectGroup>
+//                             </SelectContent>
+//                         </Select>
+//                         <Select value={semester} onValueChange={setSemester}>
+//                             <SelectTrigger className="w-full">
+//                                 <SelectValue placeholder="Select Semester" />
+//                             </SelectTrigger>
+//                             <SelectContent>
+//                                 <SelectGroup>
+//                                     <SelectItem value="Semester 1">Semester 1</SelectItem>
+//                                     <SelectItem value="Semester 2">Semester 2</SelectItem>
+//                                     <SelectItem value="Semester 3">Semester 3</SelectItem>
+//                                     <SelectItem value="Semester 4">Semester 4</SelectItem>
+//                                     <SelectItem value="Semester 5">Semester 5</SelectItem>
+//                                     <SelectItem value="Semester 6">Semester 6</SelectItem>
+//                                     <SelectItem value="Semester 7">Semester 7</SelectItem>
+//                                     <SelectItem value="Semester 8">Semester 8</SelectItem>
+//                                 </SelectGroup>
+//                             </SelectContent>
+//                         </Select>
+//                         <Select value={section} onValueChange={setSection}>
+//                             <SelectTrigger className="w-full">
+//                                 <SelectValue placeholder="Select Section" />
+//                             </SelectTrigger>
+//                             <SelectContent>
+//                                 <SelectGroup>
+//                                     <SelectItem value="ALL">ALL</SelectItem>
+//                                     <SelectItem value="A">A</SelectItem>
+//                                     <SelectItem value="B">B</SelectItem>
+//                                     <SelectItem value="C">C</SelectItem>
+//                                     <SelectItem value="D">D</SelectItem>
+//                                 </SelectGroup>
+//                             </SelectContent>
+//                         </Select>
+//                     </div>
+//                     <div className="flex justify-center">
+//                         <Button onClick={handleSubmit}>Submit</Button>
+//                     </div>
+//                 </div>
+//                 <div className="container mx-auto px-4 py-4">
+//                     <Table1 data={data} />
+//                 </div>
+//             </div>
+//         </>
+//     );
+// };
+
+// export default Grade;
+
+
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -96,7 +309,7 @@ const getSemester = (year, semester) => {
 
     if (semMon === "Nov") {
         sem =  (semYear - startYear) * 2 + 1;
-    } else if (semMon === "Apr") {
+    } else if (semMon === "May") {
         sem =  (semYear - startYear) * 2;
     }
     console.log(sem)

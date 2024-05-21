@@ -8,6 +8,7 @@ import {
 } from "react-icons/md";
 import { AiOutlineStop } from "react-icons/ai";
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Home() {
     const [active, setActive] = useState(false)
@@ -44,10 +45,14 @@ export default function Home() {
       `}>
                 <div className="p-4 w-full space-y-6">
                     <div className="flex items-center justify-between">
-                        <img className={`
-              ${active ? 'block' : 'hidden'}
-            `}
-                            src="/assets/logo.svg" />
+                    <Link href="/">
+    <img
+      className={`
+        ${active ? 'block' : 'hidden'}
+      `}
+      src="/assets/logo.svg"
+    />
+</Link>
                         <button className="p-3 rounded-xl hover:bg-light-green" onClick={toggleSidebar}>
                             <MenuIcon className="h-6 w-6" />
                         </button>

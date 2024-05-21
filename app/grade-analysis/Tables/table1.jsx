@@ -148,12 +148,6 @@ const Table1 = ({ data }) => {
         ],
     };
 
-    // const barOptions = {
-    //     scales: {
-    //         x: { title: { display: true, text: 'Subject Code' } },
-    //         y: { title: { display: true, text: 'Number of Students' } },
-    //     },
-    // };
 
     const lineOptions = {
         scales: {
@@ -170,13 +164,6 @@ const Table1 = ({ data }) => {
             },
         },
     };
-
-    // const scatterOptions = {
-    //     scales: {
-    //         x: { title: { display: true, text: 'Pass Percentage' } },
-    //         y: { title: { display: true, text: 'Avg GPA' } },
-    //     },
-    // };
 
     return (
         <div>
@@ -211,20 +198,13 @@ const Table1 = ({ data }) => {
                         </TableBody>
                     </Table>
 
-                    {/* <div className="my-8">
-                        <h2 className="text-lg font-bold mb-4">Bar Chart</h2>
-                        <Bar data={barData} options={barOptions} />
-                    </div> */}
-
+                    
                     <div className="my-8">
                         <h2 className="text-lg font-bold mb-4">Line Chart</h2>
                         <Line data={lineData} options={lineOptions} />
                     </div>
 
-                    {/* <div className="my-8">
-                        <h2 className="text-lg font-bold mb-4">Scatter Plot</h2>
-                        <Scatter data={scatterData} options={scatterOptions} />
-                    </div> */}
+                   
                 </>
             )}
         </div>

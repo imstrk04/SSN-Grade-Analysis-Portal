@@ -2,12 +2,10 @@
 import React, { useEffect } from 'react';
 import { SelectDemo } from '../components/navbar/select';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/components/firebase/config';
+import { auth } from '@/components/firebase/firebase.js';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
-import Navbar from './dashboard/page';
-import Home from '@/components/navbar/page';
 
 const IndexPage: React.FC = () => {
   useEffect(() => {
@@ -31,9 +29,8 @@ const IndexPage: React.FC = () => {
   }, [user, router]);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen" style={{ backgroundImage: `url(image/ssnbg.jpeg)` }}>
       <div className="flex flex-grow">
-      <Home/>
         <div className="flex-grow p-4 relative">
           <div className="text-gray-800">
             <div className="mb-8">
@@ -54,6 +51,7 @@ const IndexPage: React.FC = () => {
         </div>
       </div>
     </div>
+
   );
 }
 

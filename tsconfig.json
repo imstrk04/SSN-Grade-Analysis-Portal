@@ -21,6 +21,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/SideNavbar.tsx", "app/jello/page.tsx", "app/add-result/page2.tsx", "components/firebase/config.ts", "components/firebase/firebase.js", "app/nba/table1.jsx", "app/nba/table2.jsx", "app/sign-in/page.jsx", "app/grade-analysis/Tables/table2.jsx", "app/grade-analysis/page.jsx", "app/grade-analysis/Tables/table3.jsx", "components/table/table.jsx", "app/dashboard/page.jsx", "app/grade-analysis/Tables/table1.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/SideNavbar.tsx", "app/jello/page.tsx", "app/add-result/page2.tsx", "components/firebase/config.ts", "components/firebase/firebase.js", "app/nba/table1.jsx", "app/nba/table2.jsx", "app/sign-in/page.jsx", "app/grade-analysis/Tables/table2.jsx", "app/grade-analysis/page.jsx", "app/grade-analysis/Tables/table3.jsx", "components/table/table.jsx", "app/dashboard/page.jsx", "app/grade-analysis/Tables/table1.jsx", "app/sign-in/t.jsx", "app/grade-analysis/Tables/table1/page.jsx", "app/grade-analysis/Tables/table3/page.jsx"],
   "exclude": ["node_modules"]
 }

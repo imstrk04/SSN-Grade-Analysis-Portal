@@ -39,7 +39,7 @@ const fetchData = async (year, semester, section) => {
     console.log('Student Details:', studentDetails);
     console.log('Result Details:', resultDetails);
 
-    console.log(`Filtering students for batch year: ${year} and section: ${section}`);
+    console.log('Filtering students for batch year: ${year} and section: ${section}');
     const filteredStudents = studentDetails.filter(student =>
         student.Batch === year && (section === 'ALL' || student.Section === section)
     );
@@ -51,11 +51,13 @@ const fetchData = async (year, semester, section) => {
     }
 
     const semesterNumber = parseInt(semester.substring(semester.length - 1));
-    console.log(`Semester number extracted: ${semesterNumber}`);
+    console.log('Semester number extracted: ${semesterNumber}');
 
     const courseTitleMap = {};
+    const courseCreditMap = {};
     courses.forEach(course => {
-        courseTitleMap[course.CourseCode] = course.CourseTitle;
+        courseTitleMap[course.CourseCode] = course.CourseTitle; 
+        courseCreditMap[course.CourseCredit] = course.Credit;
     });
 
     console.log('Course Title Map:', courseTitleMap);
@@ -63,7 +65,7 @@ const fetchData = async (year, semester, section) => {
     const filteredData = [];
 
     filteredStudents.forEach(student => {
-        console.log(`Processing results for student: ${student.Name}`);
+        console.log('Processing results for student: ${student.Name}');
         const studentResults = resultDetails.filter(result =>
             result.RegisterNo === student.RegisterNo &&
             courses.some(course =>
@@ -76,9 +78,11 @@ const fetchData = async (year, semester, section) => {
 
         studentResults.forEach(result => {
             filteredData.push({
+                RegisterNo: student.RegisterNo, 
                 CourseCode: result.CourseCode,
-                CourseTitle: courseTitleMap[result.CourseCode] || "Unknown Course",
-                Grade: result.Grade
+                CourseTitle: courseTitleMap[result.CourseCode]|| "Unknown Course",
+                Grade: result.Grade,
+                GradePoint: courseCreditMap[result.CourseCode]
             });
         });
     });

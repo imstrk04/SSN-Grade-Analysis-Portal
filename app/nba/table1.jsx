@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import db from '../../components/firebase/config';
+import db from '../../components/firebase/firebase';
 import { ref, get, child, getDatabase } from 'firebase/database';
 
 const parseExcelDate = (excelDate) => {

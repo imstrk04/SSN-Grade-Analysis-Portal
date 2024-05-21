@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import Image from "next/image";
 import Link from 'next/link';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/components/firebase/config';
+import { auth } from '@/components/firebase/firebase';
 import { useRouter } from 'next/navigation';
 
 export default function Navbar() {

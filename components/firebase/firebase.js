@@ -21,6 +21,6 @@ if (!firebase.apps.length) {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-export { app,auth}
+export { app, auth }
 export { db }; // Export the db instance
 export default firebase;

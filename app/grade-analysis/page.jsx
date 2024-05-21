@@ -17,7 +17,7 @@ import Table1 from './Tables/table1';
 import Table2 from './Tables/table2';
 import Table3 from './Tables/table3';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/components/firebase/config';
+import { auth } from '@/components/firebase/firebase';
 import { useRouter } from 'next/navigation';
 import { ref, get, child, getDatabase } from 'firebase/database';
 

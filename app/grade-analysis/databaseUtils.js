@@ -1,4 +1,5 @@
 import { getDatabase, ref, get, child } from 'firebase/database';
+
 export const fetchData = async (year, semester, section) => {
     const dbRef = ref(getDatabase());
 
@@ -17,11 +18,9 @@ export const fetchData = async (year, semester, section) => {
     console.log('Student Details:', studentDetails);
     console.log('Result Details:', resultDetails);
 
-    console.log(`Filtering students for batch year: ${year} and section: ${section}`);
     const filteredStudents = studentDetails.filter(student =>
         student.Batch === year && (section === 'ALL' || student.Section === section)
     );
-    console.log('Filtered Students:', filteredStudents);
 
     if (filteredStudents.length === 0) {
         console.error('No students found for the specified batch year and section');
@@ -29,19 +28,17 @@ export const fetchData = async (year, semester, section) => {
     }
 
     const semesterNumber = parseInt(semester.substring(semester.length - 1));
-    console.log(`Semester number extracted: ${semesterNumber}`);
 
     const courseTitleMap = {};
+    const courseCreditMap = {};
     courses.forEach(course => {
-        courseTitleMap[course.CourseCode] = course.CourseTitle;
+        courseTitleMap[course.CourseCode] = course.CourseTitle; 
+        courseCreditMap[course.CourseCode] = course.Credit;
     });
-
-    console.log('Course Title Map:', courseTitleMap);
 
     const filteredData = [];
 
     filteredStudents.forEach(student => {
-        console.log(`Processing results for student: ${student.Name}`);
         const studentResults = resultDetails.filter(result =>
             result.RegisterNo === student.RegisterNo &&
             courses.some(course =>
@@ -50,13 +47,13 @@ export const fetchData = async (year, semester, section) => {
             )
         );
 
-        console.log('Filtered Results for Student:', studentResults);
-
         studentResults.forEach(result => {
             filteredData.push({
+                RegisterNo: student.RegisterNo, 
                 CourseCode: result.CourseCode,
-                CourseTitle: courseTitleMap[result.CourseCode] || "Unknown Course",
-                Grade: result.Grade
+                CourseTitle: courseTitleMap[result.CourseCode]|| "Unknown Course",
+                Grade: result.Grade,
+                GradeCredit: courseCreditMap[result.CourseCode]
             });
         });
     });
@@ -77,6 +74,5 @@ export const getSemester = (year, semester) => {
     } else if (semMon === "May") {
         sem =  (semYear - startYear) * 2;
     }
-    console.log(sem)
     return sem
 };

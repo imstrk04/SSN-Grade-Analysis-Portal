@@ -6,21 +6,25 @@ import * as XLSX from "xlsx";
 import { getDatabase, ref, update, get, push } from "firebase/database";
 import db from "@/components/firebase/firebase";
 import Home from "../../components/navbar/page";
+
 const ExcelUploader = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleUploadFileToDB = useCallback((acceptedFiles) => {
+    console.log("Files accepted for upload:", acceptedFiles);
     if (acceptedFiles && acceptedFiles.length > 0) {
       acceptedFiles.forEach((file) => {
         const reader = new FileReader();
         reader.onload = (evt) => {
           const bstr = evt.target.result;
           const wb = XLSX.read(bstr, { type: "binary" });
+          console.log("Workbook read successfully:", wb);
 
           wb.SheetNames.forEach((sheetName) => {
             const data = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {
               header: 1,
             });
+            console.log(`Data extracted from sheet "${sheetName}":`, data);
             if (sheetName.toLowerCase() === "students details") {
               populateStudents(data);
             }
@@ -46,25 +50,31 @@ const ExcelUploader = () => {
 
       const snapshot = await get(studentsRef);
       const existingData = snapshot.val() || {};
+      console.log("Existing data from database:", existingData);
 
       for (let i = 1; i < data.length; i++) {
-        const [registerNo, name, batch, section] = data[i];
-        if (!registerNo) continue; // Skip rows with empty register numbers
+        const [registerNo, name, batch] = data[i];
+        console.log(`Processing row ${i}:`, { registerNo, name, batch });
+        if (!registerNo) {
+          console.log(`Skipping row ${i} due to empty register number`);
+          continue; // Skip rows with empty register numbers
+        }
 
         const studentData = {
           RegisterNo: registerNo,
           Name: name,
           Batch: batch,
-          Section: section,
         };
 
         const existingRecordKey = Object.keys(existingData).find(
           (key) => existingData[key].RegisterNo === registerNo
         );
         if (existingRecordKey) {
+          console.log(`Updating existing record for register number ${registerNo}`);
           const updateRef = ref(db, `students details/${existingRecordKey}`);
           await update(updateRef, studentData);
         } else {
+          console.log(`Adding new record for register number ${registerNo}`);
           await push(studentsRef, studentData);
         }
       }

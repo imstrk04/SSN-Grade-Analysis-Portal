@@ -15,18 +15,18 @@ const ExcelUploader = () => {
         reader.onload = (evt) => {
           const bstr = evt.target.result;
           const wb = XLSX.read(bstr, { type: "binary" });
-
+  
           wb.SheetNames.forEach((sheetName, index) => {
             const data = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {
               header: 1,
             });
             if (index === 0) {
               populateResults(data);
-            } else if (index === 1) {
+            } else if (index === 1) { // Process second sheet as course details
               populateCourses(data);
             }
           });
-
+  
           setIsSubmitted(true);
         };
         reader.readAsArrayBuffer(file);
@@ -44,69 +44,71 @@ const ExcelUploader = () => {
     try {
       const database = getDatabase();
       const coursesRef = ref(database, "courses");
-
+  
       const snapshot = await get(coursesRef);
       const existingData = snapshot.val() || {};
-
+  
       for (let i = 1; i < data.length; i++) {
         const [courseCode, courseTitle, semester, credit] = data[i];
-        if (!courseCode) continue;
-
-        const courseData = {
-          CourseCode: courseCode,
-          CourseTitle: courseTitle,
-          Semester: semester,
-          Credit: credit,
-        };
-
-        const existingRecordKey = Object.keys(existingData).find(
-          (key) => existingData[key].CourseCode === courseCode
+        if (!courseCode || !courseTitle || !semester || credit === undefined) continue;
+  
+        const existingCourse = Object.values(existingData).find(
+          (course) => course.CourseCode === courseCode
         );
-        if (existingRecordKey) {
-          const updateRef = ref(database, `courses/${existingRecordKey}`);
-          await update(updateRef, courseData);
-        } else {
+  
+        if (!existingCourse) {
+          const courseData = {
+            CourseCode: courseCode,
+            CourseTitle: courseTitle,
+            Semester: semester,
+            Credit: credit,
+          };
+  
           await push(coursesRef, courseData);
         }
       }
-
+  
       console.log("Courses records added successfully to Realtime Database.");
     } catch (error) {
-      console.error(
-        "Error adding courses records to Realtime Database:",
-        error
-      );
+      console.error("Error adding courses records to Realtime Database:", error);
     }
   };
+  
+  
 
   const populateResults = async (data) => {
     try {
       const database = getDatabase();
       const resultsRef = ref(database, "result details");
-
+  
       const snapshot = await get(resultsRef);
       const existingData = snapshot.val() || {};
-
+  
       const columnNames = data[0];
-
+  
       const registerNoIndex = columnNames.indexOf("Register No.");
       const nameIndex = columnNames.indexOf("Name");
       const clearedByIndex = columnNames.indexOf("ClearedBy");
-
+  
+      if (registerNoIndex === -1 || nameIndex === -1 || clearedByIndex === -1) {
+        console.error("Column names not found in the 'result details' sheet.");
+        return;
+      }
+  
       for (let i = 1; i < data.length; i++) {
         const row = data[i];
         const registerNo = row[registerNoIndex];
         const name = row[nameIndex];
         const clearedBySerial = row[clearedByIndex];
-
+  
         if (!registerNo || !name) continue;
-
+  
         let clearedBy = "None";
         if (!isNaN(clearedBySerial)) {
           const clearedByDate = excelDateToJSDate(clearedBySerial);
           clearedBy = formatDateToMonthYear(clearedByDate);
         }
-
+  
         for (let j = 0; j < columnNames.length; j++) {
           if (
             j !== registerNoIndex &&
@@ -115,11 +117,11 @@ const ExcelUploader = () => {
           ) {
             const courseCode = columnNames[j];
             const grade = row[j];
-
+  
             if (!courseCode) continue;
-
+  
             const normalizedGrade = grade || "None";
-
+  
             const rowData = {
               RegisterNo: registerNo || "None",
               Name: name || "None",
@@ -127,13 +129,13 @@ const ExcelUploader = () => {
               Grade: normalizedGrade,
               ClearedBy: clearedBy || "None",
             };
-
+  
             const existingRecordKey = Object.keys(existingData).find(
               (key) =>
                 existingData[key].RegisterNo === rowData.RegisterNo &&
                 existingData[key].CourseCode === rowData.CourseCode
             );
-
+  
             if (existingRecordKey) {
               const updateRef = ref(
                 database,
@@ -146,7 +148,7 @@ const ExcelUploader = () => {
           }
         }
       }
-
+  
       console.log("Results records added successfully to Realtime Database.");
     } catch (error) {
       console.error(
@@ -155,6 +157,7 @@ const ExcelUploader = () => {
       );
     }
   };
+  
 
   const excelDateToJSDate = (serial) => {
     const utc_days = Math.floor(serial - 25569);

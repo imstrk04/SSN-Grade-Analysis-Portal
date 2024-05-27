@@ -19,7 +19,6 @@ export const calculateNoBacklogs = async () => {
     // Filter out results without alphabet grades
     resultDetails = resultDetails.filter(result => result.Grade !== 'None' && /[A-Za-z]/.test(result.Grade));
 
-
     console.log('Courses:', courses);
     console.log('Student Details:', studentDetails);
     console.log('Result Details:', resultDetails);
@@ -38,15 +37,13 @@ export const calculateNoBacklogs = async () => {
             result.RegisterNo === student.RegisterNo
         );
 
-
         const yearResults = {
             "Year 1": [],
             "Year 2": [],
             "Year 3": [],
             "Year 4": []
         };
-        
-        // Modify the loop to push results into yearResults
+
         studentResults.forEach(result => {
             const semesterNumber = getSemester(student.Batch, result.ClearedBy);
             if (semesterNumber <= 2) {
@@ -63,7 +60,6 @@ export const calculateNoBacklogs = async () => {
             }
         });
 
-        // Function to count unique semester numbers in a year
         function findMaxSemester(yearResults) {
             const maxSemester = {};
             for (const year in yearResults) {
@@ -78,19 +74,15 @@ export const calculateNoBacklogs = async () => {
             }
             return maxSemester;
         }
-        
-        const maxSemester = findMaxSemester(yearResults);
 
-        console.log(`Year results for student ${student.RegisterNo}:`, yearResults);
+        const maxSemester = findMaxSemester(yearResults);
 
         const yearNoBacklogs = {
             "Year 1": maxSemester["Year 1"] === 2 ? (yearResults["Year 1"].every(result => GRADE_WITH_NO_BACKLOGS.includes(result.Grade)) ? 1 : 0) : 0,
             "Year 2": maxSemester["Year 2"] === 4 ? (yearResults["Year 2"].every(result => GRADE_WITH_NO_BACKLOGS.includes(result.Grade)) ? 1 : 0) : 0,
             "Year 3": maxSemester["Year 3"] === 6 ? (yearResults["Year 3"].every(result => GRADE_WITH_NO_BACKLOGS.includes(result.Grade)) ? 1 : 0) : 0,
             "Year 4": maxSemester["Year 4"] === 8 ? (yearResults["Year 4"].every(result => GRADE_WITH_NO_BACKLOGS.includes(result.Grade)) ? 1 : 0) : 0
-        };        
-
-        console.log(`No backlogs status for student ${student.RegisterNo}:`, yearNoBacklogs);
+        };
 
         if (!batchData[student.Batch]) {
             batchData[student.Batch] = {
@@ -100,6 +92,24 @@ export const calculateNoBacklogs = async () => {
                     "Year 2": 0,
                     "Year 3": 0,
                     "Year 4": 0
+                },
+                students: {
+                    "Year 1": {
+                        withArrears: [],
+                        withoutArrears: []
+                    },
+                    "Year 2": {
+                        withArrears: [],
+                        withoutArrears: []
+                    },
+                    "Year 3": {
+                        withArrears: [],
+                        withoutArrears: []
+                    },
+                    "Year 4": {
+                        withArrears: [],
+                        withoutArrears: []
+                    }
                 }
             };
         }
@@ -107,7 +117,25 @@ export const calculateNoBacklogs = async () => {
         batchData[student.Batch].totalStudents += 1;
         Object.keys(yearNoBacklogs).forEach(year => {
             batchData[student.Batch].yearCounts[year] += yearNoBacklogs[year];
+            
+            if (yearNoBacklogs[year] === 0) {
+                const arrears = yearResults[year].filter(result => !GRADE_WITH_NO_BACKLOGS.includes(result.Grade));
+                
+                if (arrears.length > 0) {
+                    batchData[student.Batch].students[year].withArrears.push({
+                        name: student.Name,
+                        registerNo: student.RegisterNo,
+                        arrears: arrears
+                    });
+                }
+            } else {
+                batchData[student.Batch].students[year].withoutArrears.push({
+                    name: student.Name,
+                    registerNo: student.RegisterNo
+                });
+            }
         });
+        
     });
 
     console.log('Final Batch Data:', batchData);

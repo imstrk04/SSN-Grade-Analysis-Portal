@@ -1,7 +1,7 @@
-// Navbar.js
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { getDatabase, ref, get, child, onValue } from 'firebase/database';
 import {
     Select,
     SelectContent,
@@ -11,7 +11,23 @@ import {
     SelectValue,
   } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+
 const Navbar = ({ setYear, setSemester, setSection, handleSubmit }) => {
+  const [batches, setBatches] = useState([]);
+
+  useEffect(() => {
+    const database = getDatabase();
+    const batchesRef = ref(database, "student details");
+    onValue(batchesRef, (snapshot) => {
+      const data = snapshot.val();
+      const batchSet = new Set();
+      for (let id in data) {
+        batchSet.add(data[id].Batch);
+      }
+      setBatches([...batchSet]);
+    });
+  }, []);
+
   return (
     <nav className="bg-blue-500 p-6 shadow-md w-full flex justify-between items-center">
       <div style={{ marginTop: "5px" }}>
@@ -28,8 +44,9 @@ const Navbar = ({ setYear, setSemester, setSection, handleSubmit }) => {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="2022 - 2026">2022-2026</SelectItem>
-                <SelectItem value="2023 - 2027">2023-2027</SelectItem>
+                {batches.map((batch) => (
+                  <SelectItem key={batch} value={batch}>{batch}</SelectItem>
+                ))}
               </SelectGroup>
             </SelectContent>
           </Select>

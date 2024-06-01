@@ -1,13 +1,29 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback,useEffect} from "react";
 import { useDropzone } from "react-dropzone";
 import * as XLSX from "xlsx";
 import { getDatabase, ref, update, get, push } from "firebase/database";
 import db from "@/components/firebase/firebase";
 import Home from "../../components/navbar/page";
 const ExcelUploader = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (isSubmitted) {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 10000); // 10 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [isSubmitted]);
+
+  const handleFileSubmit = () => {
+    setIsSubmitted(true);
+    setIsLoading(true);
+  };
 
   const handleUploadFileToDB = useCallback((acceptedFiles) => {
     if (acceptedFiles && acceptedFiles.length > 0) {
@@ -79,20 +95,10 @@ const ExcelUploader = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Left side - Home */}
-      <div className="flex items-center justify-center h-screen bg-gray-100">
-        <div>
-          <Home />
-        </div>
-      </div>
-
-      {/* Center-right - Upload Section */}
-      <div className="flex items-center justify-center h-screen w-1/2 bg-gray-100">
-        <div
-          {...getRootProps()}
-          className="max-w-md w-full p-8 bg-white rounded-lg shadow-lg border-2 border-dashed border-gray-400"
-        >
+    <div className="flex items-center justify-center h-screen w-full bg-gray-100">
+      <Home/>
+      <div className="w-full flex items-center justify-center">
+        <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-lg border-2 border-dashed border-gray-400">
           <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
             Upload Student Details Here
           </h1>
@@ -110,7 +116,7 @@ const ExcelUploader = () => {
             </p>
             <p className="text-gray-600 text-lg mb-2">or</p>
             <input
-              {...getInputProps()}
+              onChange={handleFileSubmit}
               className="hidden"
               id="file"
               type="file"
@@ -123,9 +129,25 @@ const ExcelUploader = () => {
             </label>
           </label>
           {isSubmitted && (
-            <p className="text-green-600 mt-4 font-semibold text-center">
-              File submitted successfully!
-            </p>
+            <div className="flex-col gap-4 w-full flex items-center justify-center">
+              {isLoading ? (
+                <div className="w-28 h-28 border-8 text-blue-400 text-4xl animate-spin border-gray-300 flex items-center justify-center border-t-blue-400 rounded-full">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    height="1em"
+                    width="1em"
+                    className="animate-ping"
+                  >
+                    <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z"></path>
+                  </svg>
+                </div>
+              ) : (
+                <p className="text-green-600 mt-4 font-semibold text-center">
+                  File submitted successfully!
+                </p>
+              )}
+            </div>
           )}
         </div>
       </div>

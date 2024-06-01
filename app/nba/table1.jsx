@@ -1,91 +1,70 @@
-'use client'
+"use client"
 
 import React, { useState, useEffect } from 'react';
-import db from '../../components/firebase/firebase';
-import { ref, get, child, getDatabase } from 'firebase/database';
-
-const parseExcelDate = (excelDate) => {
-    const excelEpoch = new Date(Date.UTC(1899, 11, 30));
-    const millisecondsSinceEpoch = excelDate * 24 * 60 * 60 * 1000;
-    const date = new Date(excelEpoch.getTime() + millisecondsSinceEpoch);
-    return date;
-};
+import { calculateNoBacklogs } from './getData.js';
 
 const Table1 = () => {
     const [table1Data, setTable1Data] = useState({});
     const [loading, setLoading] = useState(true);
+    const [selectedCell, setSelectedCell] = useState(null);
+    const [studentDetailsWithArrears, setStudentDetailsWithArrears] = useState(null);
+    const [studentDetailsWithoutArrears, setStudentDetailsWithoutArrears] = useState(null);
 
     useEffect(() => {
-        const fetchTableData = async () => {
-            try {
-                const dbRef = ref(getDatabase());
-                const studentDetailsSnapshot = await get(child(dbRef, 'students details'));
-                const resultDetailsSnapshot = await get(child(dbRef, 'result details'));
-
-                const studentDetails = Object.values(studentDetailsSnapshot.val());
-                const resultDetails = Object.values(resultDetailsSnapshot.val());
-
-                const batches = Array.from(new Set(studentDetails.map(data => data.Batch)));
-
-                const dataByBatch = {};
-
-                for (const batch of batches) {
-                    const studentsInBatch = studentDetails.filter(data => data.Batch === batch);
-                    const totalStudents = studentsInBatch.length;
-
-                    const yearCounts = {
-                        "Year 1": 0,
-                        "Year 2": 0,
-                        "Year 3": 0,
-                        "Year 4": 0
-                    };
-
-                    for (const student of studentsInBatch) {
-                        const studentResultDetails = resultDetails.filter(result => result.RegisterNo === student.RegisterNo);
-
-                        // Find the maximum 'ClearedBy' date for the student
-                        let maxClearedBy = 0;
-                        for (const result of studentResultDetails) {
-                            if (result.ClearedBy > maxClearedBy) {
-                                maxClearedBy = result.ClearedBy;
-                            }
-                        }
-
-                        // Convert 'ClearedBy' to human-readable year
-                        const clearedByDate = parseExcelDate(maxClearedBy);
-                        const clearedByYear = clearedByDate.getFullYear();
-
-                        // Determine the academic year based on 'ClearedBy' date
-                        const startYear = parseInt(batch.split(" - ")[0]);
-                        const currentYearInBatch = clearedByYear - startYear + 1;
-
-                        // Count the student if they have no backlogs for the current year and all previous years
-                        if (!studentResultDetails.some(result => result.Grade === 'RA')) {
-                            for (let i = 1; i <= currentYearInBatch; i++) {
-                                yearCounts[`Year ${i}`]++;
-                            }
-                        }
-                    }
-
-                    dataByBatch[batch] = { totalStudents, yearCounts };
-                }
-
-                setTable1Data(dataByBatch);
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
+        const fetchData = async () => {
+            setLoading(true);
+            const data = await calculateNoBacklogs();
+            setTable1Data(data);
+            setLoading(false);
         };
 
-        fetchTableData();
+        fetchData();
     }, []);
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+    const handleCellClick = (batch, year) => {
+        setSelectedCell({ batch, year });
+        setStudentDetailsWithArrears(table1Data[batch].students[year].withArrears);
+        setStudentDetailsWithoutArrears(table1Data[batch].students[year].withoutArrears);
+    };
 
     return (
         <div className="overflow-x-auto">
+            <style>
+                {`
+                .modal {
+                    display: block;
+                    position: fixed;
+                    z-index: 1;
+                    padding-top: 60px;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    overflow: auto;
+                    background-color: rgb(0,0,0);
+                    background-color: rgba(0,0,0,0.4);
+                }
+                .modal-content {
+                    background-color: #fefefe;
+                    margin: 5% auto;
+                    padding: 20px;
+                    border: 1px solid #888;
+                    width: 80%;
+                }
+                .close {
+                    color: #aaa;
+                    float: right;
+                    font-size: 28px;
+                    font-weight: bold;
+                }
+                .close:hover,
+                .close:focus {
+                    color: black;
+                    text-decoration: none;
+                    cursor: pointer;
+                }
+                `}
+            </style>
             <table className="table-auto border-collapse w-full">
                 <thead>
                     <tr className="bg-gray-200">
@@ -103,23 +82,74 @@ const Table1 = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {Object.keys(table1Data).map(batch => (
-                        <tr key={batch} className="text-center">
-                            <td className="border border-gray-400 px-4 py-2">{batch}</td>
-                            <td className="border border-gray-400 px-4 py-2">{table1Data[batch].totalStudents}</td>
-                            <td className="border border-gray-400 px-4 py-2">{table1Data[batch].yearCounts["Year 1"]}</td>
-                            <td className="border border-gray-400 px-4 py-2">{table1Data[batch].yearCounts["Year 2"]}</td>
-                            <td className="border border-gray-400 px-4 py-2">{table1Data[batch].yearCounts["Year 3"]}</td>
-                            <td className="border border-gray-400 px-4 py-2">{table1Data[batch].yearCounts["Year 4"]}</td>
+                    {loading ? (
+                        <tr>
+                            <td colSpan={6} className="border border-gray-400 px-4 py-2 text-center">Loading...</td>
                         </tr>
-                    ))}
-                    {Object.keys(table1Data).length === 0 && (
+                    ) : (
+                        Object.keys(table1Data).map(batch => (
+                            <tr key={batch} className="text-center">
+                                <td className="border border-gray-400 px-4 py-2">{batch}</td>
+                                <td className="border border-gray-400 px-4 py-2">{table1Data[batch].totalStudents}</td>
+                                <td className="border border-gray-400 px-4 py-2 cursor-pointer" onClick={() => handleCellClick(batch, "Year 1")}>{table1Data[batch].yearCounts["Year 1"]}</td>
+                                <td className="border border-gray-400 px-4 py-2 cursor-pointer" onClick={() => handleCellClick(batch, "Year 2")}>{table1Data[batch].yearCounts["Year 2"]}</td>
+                                <td className="border border-gray-400 px-4 py-2 cursor-pointer" onClick={() => handleCellClick(batch, "Year 3")}>{table1Data[batch].yearCounts["Year 3"]}</td>
+                                <td className="border border-gray-400 px-4 py-2 cursor-pointer" onClick={() => handleCellClick(batch, "Year 4")}>{table1Data[batch].yearCounts["Year 4"]}</td>
+                            </tr>
+                        ))
+                    )}
+                    {Object.keys(table1Data).length === 0 && !loading && (
                         <tr>
                             <td colSpan={6} className="border border-gray-400 px-4 py-2 text-center">No data available</td>
                         </tr>
                     )}
                 </tbody>
             </table>
+            {selectedCell && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <span className="close" onClick={() => setSelectedCell(null)}>&times;</span>
+                        <h2>{selectedCell.batch} - {selectedCell.year}</h2>
+                        <div className="flex">
+                            <div className="w-1/2 p-4">
+                                <h3>Students with Arrears</h3>
+                                <ul>
+                                    {studentDetailsWithArrears.length > 0 ? (
+                                        studentDetailsWithArrears.map(student => (
+                                            <li key={student.registerNo}>
+                                                <strong>{student.name} ({student.registerNo}):</strong>
+                                                <ul>
+                                                    {student.arrears.map((arrear, index) => (
+                                                        <li key={index}>
+                                                            {arrear.CourseCode}: {arrear.Grade} in {arrear.ClearedBy}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </li>
+                                        ))
+                                    ) : (
+                                        <p>No students with arrears</p>
+                                    )}
+                                </ul>
+                            </div>
+                            <div className="w-1/2 p-4">
+                                <h3>Students without Arrears</h3>
+                                <ul>
+                                    {studentDetailsWithoutArrears.length > 0 ? (
+                                        studentDetailsWithoutArrears.map(student => (
+                                            <li key={student.registerNo}>
+                                                <strong>{student.name} ({student.registerNo})</strong>
+                                            </li>
+                                        ))
+                                    ) : (
+                                        <p>No students without arrears</p>
+                                    )}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

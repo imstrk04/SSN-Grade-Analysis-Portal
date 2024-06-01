@@ -6,7 +6,8 @@ import { auth } from '@/components/firebase/firebase.js';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
-
+import { motion, AnimatePresence, } from "framer-motion";
+import { useRef } from "react";
 const IndexPage: React.FC = () => {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -27,8 +28,20 @@ const IndexPage: React.FC = () => {
       }
     }
   }, [user, router]);
-
+  const scrollRef = useRef(null);
   return (
+    <div ref={scrollRef} style={{ overflow: "scroll" }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ root: scrollRef }}
+        />
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 1, y: 15 }}
+            transition={{ delay: 0.25 }}>
     <div className="flex flex-col h-screen" style={{ backgroundImage: `url(image/ssnbg.jpeg)` }}>
       <div className="flex flex-grow">
         <div className="flex-grow p-4 relative">
@@ -51,7 +64,9 @@ const IndexPage: React.FC = () => {
         </div>
       </div>
     </div>
-
+    </motion.div>
+    </AnimatePresence>
+    </div>
   );
 }
 

@@ -108,6 +108,7 @@ const ExcelUploader = () => {
         }
 
         for (let j = 0; j < columnNames.length; j++) {
+          console.log('here')
           if (
             j !== registerNoIndex &&
             j !== nameIndex &&
@@ -127,6 +128,8 @@ const ExcelUploader = () => {
               Grade: normalizedGrade,
               ClearedBy: clearedBy || "None",
             };
+
+            console.log(rowData)
 
             const existingRecordKey = Object.keys(existingData).find(
               (key) =>

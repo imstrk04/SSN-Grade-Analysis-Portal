@@ -28,6 +28,7 @@ const Navbar = ({ setYear, setSemester, setSection, handleSubmit }) => {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
+                <SelectItem value="2021 - 2025">2021-2025</SelectItem>
                 <SelectItem value="2022 - 2026">2022-2026</SelectItem>
                 <SelectItem value="2023 - 2027">2023-2027</SelectItem>
               </SelectGroup>

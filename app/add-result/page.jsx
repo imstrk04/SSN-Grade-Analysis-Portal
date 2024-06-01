@@ -40,39 +40,41 @@ const ExcelUploader = () => {
     onDrop: handleUploadFileToDB,
   });
 
-  const populateCourses = async (data) => {
-    try {
-      const database = getDatabase();
-      const coursesRef = ref(database, "courses");
-  
-      const snapshot = await get(coursesRef);
-      const existingData = snapshot.val() || {};
-  
-      for (let i = 1; i < data.length; i++) {
-        const [courseCode, courseTitle, semester, credit] = data[i];
-        if (!courseCode || !courseTitle || !semester || credit === undefined) continue;
-  
-        const existingCourse = Object.values(existingData).find(
-          (course) => course.CourseCode === courseCode
-        );
-  
-        if (!existingCourse) {
-          const courseData = {
-            CourseCode: courseCode,
-            CourseTitle: courseTitle,
-            Semester: semester,
-            Credit: credit,
-          };
-  
-          await push(coursesRef, courseData);
-        }
+const populateCourses = async (data) => {
+  try {
+    const database = getDatabase();
+    const coursesRef = ref(database, "courses");
+
+    const snapshot = await get(coursesRef);
+    const existingData = snapshot.val() || {};
+
+    for (let i = 1; i < data.length; i++) {
+      const [courseCode, courseTitle, semester, credit] = data[i];
+
+      if (!courseCode || !courseTitle || !semester || credit === undefined) continue;
+
+      const existingCourse = Object.values(existingData).find(
+        (course) => course.CourseCode === courseCode
+      );
+
+      if (!existingCourse) {
+        const courseData = {
+          CourseCode: courseCode,
+          CourseTitle: courseTitle,
+          Semester: semester,
+          Credit: credit,
+        };
+
+        await push(coursesRef, courseData);
       }
-  
-      console.log("Courses records added successfully to Realtime Database.");
-    } catch (error) {
-      console.error("Error adding courses records to Realtime Database:", error);
     }
-  };
+
+    console.log("Courses records added successfully to Realtime Database.");
+  } catch (error) {
+    console.error("Error adding courses records to Realtime Database:", error);
+  }
+};
+
   
   
 
@@ -107,6 +109,9 @@ const ExcelUploader = () => {
         if (!isNaN(clearedBySerial)) {
           const clearedByDate = excelDateToJSDate(clearedBySerial);
           clearedBy = formatDateToMonthYear(clearedByDate);
+        } else if (typeof clearedBySerial === "string" && clearedBySerial.trim() !== "") {
+          // If the ClearedBy value is a non-empty string, use it
+          clearedBy = clearedBySerial.trim();
         }
   
         for (let j = 0; j < columnNames.length; j++) {
@@ -157,6 +162,7 @@ const ExcelUploader = () => {
       );
     }
   };
+  
   
 
   const excelDateToJSDate = (serial) => {

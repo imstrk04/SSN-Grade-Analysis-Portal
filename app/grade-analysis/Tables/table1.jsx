@@ -25,7 +25,19 @@ const Table1 = ({ data }) => {
 
     const calculateStatistics = () => {
         const statistics = {};
-
+        const counters = {}; // Counter variable for each subject
+        const studentsAppearedDict = {}; // Dictionary for students appeared per subject
+        
+        // Initialize counters and studentsAppearedDict
+        data.forEach(item => {
+            if (!counters[item.CourseCode]) {
+                counters[item.CourseCode] = 0;
+            }
+            if (!studentsAppearedDict[item.CourseCode]) {
+                studentsAppearedDict[item.CourseCode] = 0;
+            }
+        });
+    
         // Calculate statistics based on the data
         data.forEach(item => {
             if (!statistics[item.CourseCode]) {
@@ -35,55 +47,69 @@ const Table1 = ({ data }) => {
                     Appeared: 0,
                     Passed: 0,
                     Failed: 0,
-                    TotalGPA: 0
+                    TotalGPA: 0,
                 };
             }
-
-            statistics[item.CourseCode].Appeared++;
-            if (item.Grade !== 'U' && item.Grade !== 'R' && item.Grade !== 'RA') {
+            if (item.Grade !== '-')
+                {
+                    statistics[item.CourseCode].Appeared++;
+                    studentsAppearedDict[item.CourseCode]++; // Update the appeared count in the dictionary        
+                }
+            
+            if (item.Grade !== 'U' && item.Grade !== 'R' && item.Grade !== 'RA' && item.Grade != '-' && item.Grade !== 'None') {
                 statistics[item.CourseCode].Passed++;
+                counters[item.CourseCode]++; // Increase counter if the student has appeared
             } else {
                 statistics[item.CourseCode].Failed++;
             }
-
-            let gradeMultiplier = 0;
-            switch (item.Grade) {
-                case 'O':
-                    gradeMultiplier = 10;
-                    break;
-                case 'A+':
-                    gradeMultiplier = 9;
-                    break;
-                case 'A':
-                    gradeMultiplier = 8;
-                    break;
-                case 'B+':
-                    gradeMultiplier = 7;
-                    break;
-                case 'B':
-                    gradeMultiplier = 6;
-                    break;
-                case 'C':
-                    gradeMultiplier = 5;
-                    break;
-                default:
-                    gradeMultiplier = 0;
-                    break;
+        
+            if (item.Grade !== '-') { // Check if the student actually took the course
+                let gradeMultiplier = 0;
+                switch (item.Grade) {
+                    case 'O':
+                        gradeMultiplier = 10;
+                        break;
+                    case 'A+':
+                        gradeMultiplier = 9;
+                        break;
+                    case 'A':
+                        gradeMultiplier = 8;
+                        break;
+                    case 'B+':
+                        gradeMultiplier = 7;
+                        break;
+                    case 'B':
+                        gradeMultiplier = 6;
+                        break;
+                    case 'C':
+                        gradeMultiplier = 5;
+                        break;
+                    default:
+                        gradeMultiplier = 0;
+                        break;
+                }
+                statistics[item.CourseCode].TotalGPA += gradeMultiplier;
             }
-            statistics[item.CourseCode].TotalGPA += gradeMultiplier;
         });
-
+        
+        // Calculate Pass Percentage and Average GPA for each subject
         Object.values(statistics).forEach(course => {
             const totalStudents = course.Appeared;
             const passedStudents = course.Passed;
-
+    
+            const counter = counters[course.CourseCode] || 1; // Use counter or default to 1
             course.PassPercentage = totalStudents !== 0 ? ((passedStudents / totalStudents) * 100).toFixed(2) + '%' : 'N/A';
-            course.AvgGPA = totalStudents !== 0 ? (course.TotalGPA / totalStudents).toFixed(2) : 'N/A';
+            course.AvgGPA = counter !== 0 ? (course.TotalGPA / counter).toFixed(2) : 'N/A'; // Divide by counter
         });
-
+    
+        // Print the dictionary of students appeared per subject
+        console.log('appeareddict',studentsAppearedDict);
+    
         return Object.values(statistics);
     };
+    
 
+    
     const statistics = calculateStatistics();
 
     // Prepare data for the charts
@@ -148,7 +174,6 @@ const Table1 = ({ data }) => {
         ],
     };
 
-
     const lineOptions = {
         scales: {
             y: {
@@ -198,13 +223,20 @@ const Table1 = ({ data }) => {
                         </TableBody>
                     </Table>
 
-                    
+                    <div className="my-8">
+                        <h2 className="text-lg font-bold mb-4">Bar Chart</h2>
+                        <Bar data={barData} />
+                    </div>
+
                     <div className="my-8">
                         <h2 className="text-lg font-bold mb-4">Line Chart</h2>
                         <Line data={lineData} options={lineOptions} />
                     </div>
 
-                   
+                    <div className="my-8">
+                        <h2 className="text-lg font-bold mb-4">Scatter Plot</h2>
+                        <Scatter data={scatterData} />
+                    </div>
                 </>
             )}
         </div>

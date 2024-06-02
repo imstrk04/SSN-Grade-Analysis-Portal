@@ -81,7 +81,7 @@ const Grade = () => {
               <p className="mt-2 text-base text-gray-700">
                 A Grade Distribution Table summarizes the distribution of
                 grades in a course or exam. It shows the number of students
-                who received each grade, like "A+", "A", "B+", "B", etc. This
+                who received each grade, like &quot;A+&quot;, &quot;A&quot;, &quot;B+&quot;, &quot;B&quot;, etc. This
                 helps assess overall performance.
               </p>
             </div>
@@ -123,7 +123,6 @@ const Grade = () => {
       </div>
     </div>
   );
-
 };
 
 export default Grade;

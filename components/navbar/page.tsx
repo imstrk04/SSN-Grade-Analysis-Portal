@@ -66,7 +66,7 @@ export default function Home() {
                             <span className={`
                 ml-3
                 ${active ? 'block' : 'hidden'}
-              `}>Dashboard</span>
+              `}>Student GradeBook</span>
                         </button>
 
 
@@ -83,16 +83,10 @@ export default function Home() {
                             <span className={`
                 ml-3
                 ${active ? 'block' : 'hidden'}
-              `}>NBA Records</span>
+              `}>BatchWise Analysis</span>
                         </button>
 
-                        <button className="flex w-full p-3 rounded-xl hover:bg-light-green" onClick={handleClick3}>
-                            <AiOutlineStop className="h-6 w-6" />
-                            <span className={`
-                ml-3
-                ${active ? 'block' : 'hidden'}
-              `}>BackLogs</span>
-                        </button>
+                        
                     </div>
                 </div>
             </aside>

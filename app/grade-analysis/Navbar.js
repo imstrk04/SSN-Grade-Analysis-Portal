@@ -72,14 +72,15 @@ const Navbar = ({ setYear, setSemester, setRollNumberStart, setRollNumberEnd, ha
             placeholder="Roll Number Start"
             value={rollNumberStart}
             onChange={(e) => setRollNumberStart(e.target.value)}
-            className="w-40 md:w-[200px] bg-white text-gray-800 rounded-md"
+            className="w-10 h-10 md:w-[200px] bg-white text-gray-800 rounded-md"
           />
+          <p>--{">"}</p>
           <input
             type="text"
             placeholder="Roll Number End"
             value={rollNumberEnd}
             onChange={(e) => setRollNumberEnd(e.target.value)}
-            className="w-40 md:w-[200px] bg-white text-gray-800 rounded-md"
+            className="w-10 h-10 md:w-[200px] bg-white text-gray-800 rounded-md"
           />
           <Button
             onClick={handleSubmit}

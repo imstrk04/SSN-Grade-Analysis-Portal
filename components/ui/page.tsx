@@ -125,8 +125,9 @@ const CardMenu: React.FC = () => {
                     </div>
 
                     <div className="box">
-                        <img src="image/icon8.png" alt="" />
-                        <h3>NBA Records</h3>
+                    <img src="image/icon8.png" alt="" style={{ width: '150px', height: '150px' }} />
+
+                        <h3>Batchwise Analysis</h3>
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus, commodi?</p>
                         <Button className="btn" onClick={handleContinue2}>Click Here</Button>
                     </div>

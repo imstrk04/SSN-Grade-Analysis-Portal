@@ -1,8 +1,6 @@
-
-
 'use client'
 import React, { useState, useEffect } from 'react';
-import TableDemo from '../../components/table/table';
+
 import FirebaseDataPage from '../../components/table/table';
 import Home from '../../components/navbar/page';
 import {
@@ -53,7 +51,7 @@ export default function Navbar() {
                 <div className="max-w-7xl mx-auto flex items-center w-full px-2 lg:px-8">
                     <h1 className="flex-shrink-0 mr-auto"> </h1>
                     <div className="flex items-center space-x-4">
-                        <Select>
+                        <Select onValueChange={(value) => setSelectedAcademicYear(value)}>
                             <SelectTrigger className="w-full md:w-[200px] bg-white text-gray-800 rounded-md cursor-pointer">
                                 <SelectValue placeholder="Select academic year" />
                             </SelectTrigger>
@@ -65,7 +63,7 @@ export default function Navbar() {
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                        <Select>
+                        <Select onValueChange={(value) => setSelectedSemester(value)}>
                             <SelectTrigger className="w-full md:w-[200px] bg-white text-gray-800 rounded-md cursor-pointer">
                                 <SelectValue placeholder="Select semester" />
                             </SelectTrigger>

@@ -154,6 +154,7 @@ const FirebaseDataPage = () => {
           </div>
         </div>
       </nav>
+      
       <div className="overflow-x-auto">
         {isSubmitted && selectedSemester && selectedAcademicYear && (
           <div>

@@ -73,23 +73,19 @@ const Grade = () => {
               </button>
             </div>
           </div>
-          <div class="relative flex flex-col rounded-xl bg-white shadow-lg">
-            <div class="p-6">
-              <h5 class="text-2xl font-semibold text-blue-gray-900">
+          <div className="relative flex flex-col rounded-xl bg-white shadow-lg">
+            <div className="p-6">
+              <h5 className="text-2xl font-semibold text-blue-gray-900">
                 Grade Distribution Table
               </h5>
-              <p class="mt-2 text-base text-gray-700">
-                <p>
-              
-                    A Grade Distribution Table summarizes the distribution of
-                    grades in a course or exam. It shows the number of students
-                    who received each grade, like "A+", "A", "B+", "B", etc.
-                    This helps assess overall performance.
-                
-                </p>
+              <p className="mt-2 text-base text-gray-700">
+                A Grade Distribution Table summarizes the distribution of
+                grades in a course or exam. It shows the number of students
+                who received each grade, like "A+", "A", "B+", "B", etc. This
+                helps assess overall performance.
               </p>
             </div>
-            <div class="p-6 mt-auto">
+            <div className="p-6 mt-auto">
               <button
                 data-ripple-light="true"
                 type="button"
@@ -127,6 +123,7 @@ const Grade = () => {
       </div>
     </div>
   );
+
 };
 
 export default Grade;

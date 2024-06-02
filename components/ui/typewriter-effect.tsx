@@ -26,6 +26,7 @@ export const TypewriterEffect = ({
 
   const [scope, animate] = useAnimate();
   const isInView = useInView(scope);
+
   useEffect(() => {
     if (isInView) {
       animate(
@@ -42,7 +43,7 @@ export const TypewriterEffect = ({
         }
       );
     }
-  }, [isInView]);
+  }, [isInView, animate]); // Added 'animate' as a dependency
 
   const renderWords = () => {
     return (
@@ -69,6 +70,7 @@ export const TypewriterEffect = ({
       </motion.div>
     );
   };
+
   return (
     <div
       className={cn(
@@ -117,6 +119,7 @@ export const TypewriterEffectSmooth = ({
       text: word.text.split(""),
     };
   });
+
   const renderWords = () => {
     return (
       <div>

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
-
 import { useRouter } from 'next/navigation';
 import React from 'react';
+import Image from 'next/image';
 
 const CardMenu: React.FC = () => {
     const router = useRouter();
@@ -14,7 +14,8 @@ const CardMenu: React.FC = () => {
     };
     const handleContinue3 = () => {
         router.push('/dashboard');
-    }
+    };
+
     return (
         <>
             <style jsx>{`
@@ -111,27 +112,25 @@ const CardMenu: React.FC = () => {
             <div className="container">
                 <div className="box-container">
                     <div className="box">
-                        <img src="image/icon0.png" alt="" />
+                        <Image src="/image/icon0.png" alt="" width={120} height={120} />
                         <h3>Students Gradebook</h3>
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus, commodi?</p>
                         <Button className="btn" onClick={handleContinue3}>Click Here</Button>
                     </div>
 
                     <div className="box">
-                        <img src="image/icon7.jpg" alt="" />
+                        <Image src="/image/icon7.jpg" alt="" width={120} height={120} />
                         <h3>Grade Analysis</h3>
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus, commodi?</p>
                         <Button className="btn" onClick={handleContinue}>Click Here</Button>
                     </div>
 
                     <div className="box">
-                    <img src="image/icon8.png" alt="" style={{ width: '150px', height: '150px' }} />
-
+                        <Image src="/image/icon8.png" alt="" width={150} height={150} />
                         <h3>Batchwise Analysis</h3>
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus, commodi?</p>
                         <Button className="btn" onClick={handleContinue2}>Click Here</Button>
                     </div>
-
                 </div>
             </div>
         </>

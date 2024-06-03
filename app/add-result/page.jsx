@@ -131,7 +131,7 @@ const populateCourses = async (data) => {
               RegisterNo: registerNo || "None",
               Name: name || "None",
               CourseCode: courseCode || "None",
-              Grade: normalizedGrade,
+              Grade: normalizedGrade || "-",
               ClearedBy: clearedBy || "None",
             };
   

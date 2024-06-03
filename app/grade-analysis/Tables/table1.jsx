@@ -50,7 +50,7 @@ const Table1 = ({ data }) => {
                     TotalGPA: 0,
                 };
             }
-            if (item.Grade !== '-')
+            if (item.Grade !== '-') 
                 {
                     statistics[item.CourseCode].Appeared++;
                     studentsAppearedDict[item.CourseCode]++; // Update the appeared count in the dictionary        

@@ -65,7 +65,7 @@ const ExcelUploader = () => {
           (key) => existingData[key].RegisterNo === registerNo
         );
         if (existingRecordKey) {
-          const updateRef = ref(database, `students details/${existingRecordKey}`);
+          const updateRef = ref(database, `student details/${existingRecordKey}`);
           await update(updateRef, studentData);
         } else {
           console.log(`Adding new record for register number ${registerNo}`);

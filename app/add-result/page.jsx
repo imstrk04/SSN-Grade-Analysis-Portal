@@ -11,7 +11,7 @@ const ExcelUploader = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const populateCourses = async (data) => {
+  const populateCourses = useCallback(async (data) => {
     try {
       const database = getDatabase();
       const coursesRef = ref(database, "courses");
@@ -48,9 +48,9 @@ const ExcelUploader = () => {
         error
       );
     }
-  };
+  },[]);
 
-  const populateResults = async (data) => {
+  const populateResults = useCallback(async (data) => {
     try {
       const database = getDatabase();
       const resultsRef = ref(database, "result details");
@@ -125,7 +125,7 @@ const ExcelUploader = () => {
         error
       );
     }
-  };
+  },[]);;
 
   const handleUploadFileToDB = useCallback(
     (acceptedFiles) => {

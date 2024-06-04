@@ -50,7 +50,7 @@ const Table2 = ({ data }) => {
                 passedStudents[item.RegisterNo] = "Passed";
             }
 
-              if (item.Grade != 'None') {
+              if (item.Grade != '-') {
                 const grade = gradePoints[item.Grade];
                 const credit = item.GradeCredit || 0;
 

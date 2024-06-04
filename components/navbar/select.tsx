@@ -34,6 +34,9 @@ export function SelectDemo() {
     const handleContinue1 = () => {
         router.push('/add-batch');
     };
+    const handleContinue2 = () => {
+        router.push('/delete-record');
+    };
     const words = [
         {
             text: "Student",
@@ -120,7 +123,7 @@ export function SelectDemo() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleContinue}>Continue</AlertDialogAction>
+                                    <AlertDialogAction onClick={handleContinue2}>Continue</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>

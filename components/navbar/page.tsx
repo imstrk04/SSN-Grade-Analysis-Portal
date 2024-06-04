@@ -94,8 +94,6 @@ export default function Home() {
                 ${active ? 'block' : 'hidden'}
               `}>BatchWise Analysis</span>
                         </button>
-
-                       
                     </div>
                 </div>
             </aside>

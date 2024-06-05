@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react';
 import {
     Table,
@@ -7,162 +8,80 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Bar, Line, Scatter } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
 
 const Table1 = ({ data }) => {
     const [loading, setLoading] = useState(true);
+    const [statistics, setStatistics] = useState([]);
 
     useEffect(() => {
         if (data && data.length > 0) {
+            console.log("Data received for Table1:", data);
+            const stats = calculateStatistics(data);
+            setStatistics(stats);
             setLoading(false);
         } else {
             console.error("Invalid data structure received in Table1:", data);
         }
     }, [data]);
 
-    const calculateStatistics = () => {
-        const statistics = {};
+    const calculateStatistics = (data) => {
+        const courseStats = {};
 
-        // Calculate statistics based on the data
+        const gradePoints = {
+            'O': 10,
+            'A+': 9,
+            'A': 8,
+            'B+': 7,
+            'B': 6,
+            'C': 5,
+            'U': 0,
+            'R': 0,
+            'RA': 0
+        };
+
         data.forEach(item => {
-            if (!statistics[item.CourseCode]) {
-                statistics[item.CourseCode] = {
-                    CourseCode: item.CourseCode,
-                    CourseTitle: item.CourseTitle,
-                    Appeared: 0,
-                    Passed: 0,
-                    Failed: 0,
-                    TotalGPA: 0
-                };
-            }
+            const { CourseCode, CourseTitle, Grade, GradeCredit } = item;
+            const GRADES = ['O', 'A+', 'A', 'B', 'B+', 'C', 'RA', 'U', 'AB'];
 
-            statistics[item.CourseCode].Appeared++;
-            if (item.Grade !== 'U' && item.Grade !== 'R' && item.Grade !== 'RA') {
-                statistics[item.CourseCode].Passed++;
-            } else {
-                statistics[item.CourseCode].Failed++;
-            }
+            if (GRADES.includes(Grade)) {
+                if (!courseStats[CourseCode]) {
+                    courseStats[CourseCode] = {
+                        CourseTitle,
+                        appeared: 0,
+                        passed: 0,
+                        failed: 0,
+                        totalGradePoints: 0,
+                        totalCredits: 0,
+                    };
+                }
+                
+                courseStats[CourseCode].appeared++;
+                courseStats[CourseCode].totalCredits += GradeCredit || 0;
+                courseStats[CourseCode].totalGradePoints += (Grade in gradePoints ? gradePoints[Grade] : 0) * (GradeCredit || 0);
 
-            let gradeMultiplier = 0;
-            switch (item.Grade) {
-                case 'O':
-                    gradeMultiplier = 10;
-                    break;
-                case 'A+':
-                    gradeMultiplier = 9;
-                    break;
-                case 'A':
-                    gradeMultiplier = 8;
-                    break;
-                case 'B+':
-                    gradeMultiplier = 7;
-                    break;
-                case 'B':
-                    gradeMultiplier = 6;
-                    break;
-                case 'C':
-                    gradeMultiplier = 5;
-                    break;
-                default:
-                    gradeMultiplier = 0;
-                    break;
+                if (Grade !== 'RA' && Grade !== 'U' && Grade !== 'AB') {
+                    courseStats[CourseCode].passed++;
+                } else {
+                    courseStats[CourseCode].failed++;
+                }
             }
-            statistics[item.CourseCode].TotalGPA += gradeMultiplier;
         });
 
-        Object.values(statistics).forEach(course => {
-            const totalStudents = course.Appeared;
-            const passedStudents = course.Passed;
-
-            course.PassPercentage = totalStudents !== 0 ? ((passedStudents / totalStudents) * 100).toFixed(2) + '%' : 'N/A';
-            course.AvgGPA = totalStudents !== 0 ? (course.TotalGPA / totalStudents).toFixed(2) : 'N/A';
+        Object.keys(courseStats).forEach(courseCode => {
+            const stats = courseStats[courseCode];
+            stats.passPercentage = ((stats.passed / stats.appeared) * 100).toFixed(2);
+            stats.avgGPA = (stats.totalGradePoints / stats.totalCredits).toFixed(2);
         });
 
-        return Object.values(statistics);
-    };
-
-    const statistics = calculateStatistics();
-
-    // Prepare data for the charts
-    const subjectCodes = statistics.map(stat => stat.CourseCode);
-    const appearedData = statistics.map(stat => stat.Appeared);
-    const passedData = statistics.map(stat => stat.Passed);
-    const failedData = statistics.map(stat => stat.Failed);
-    const passPercentageData = statistics.map(stat => parseFloat(stat.PassPercentage));
-    const avgGPAData = statistics.map(stat => parseFloat(stat.AvgGPA));
-
-    const barData = {
-        labels: subjectCodes,
-        datasets: [
-            {
-                label: 'Appeared',
-                data: appearedData,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-            },
-            {
-                label: 'Passed',
-                data: passedData,
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-            },
-            {
-                label: 'Failed',
-                data: failedData,
-                backgroundColor: 'rgba(255, 99, 132, 0.6)',
-            },
-        ],
-    };
-
-    const lineData = {
-        labels: subjectCodes,
-        datasets: [
-            {
-                label: 'Pass Percentage',
-                data: passPercentageData,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                fill: false,
-                yAxisID: 'y',
-            },
-            {
-                label: 'Avg GPA',
-                data: avgGPAData,
-                borderColor: 'rgba(255, 99, 132, 1)',
-                fill: false,
-                yAxisID: 'y1',
-            },
-        ],
-    };
-
-    const scatterData = {
-        datasets: [
-            {
-                label: 'Pass Percentage vs Avg GPA',
-                data: statistics.map(stat => ({
-                    x: parseFloat(stat.PassPercentage),
-                    y: parseFloat(stat.AvgGPA),
-                })),
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-            },
-        ],
-    };
-
-
-    const lineOptions = {
-        scales: {
-            y: {
-                type: 'linear',
-                position: 'left',
-                title: { display: true, text: 'Pass Percentage' },
-            },
-            y1: {
-                type: 'linear',
-                position: 'right',
-                title: { display: true, text: 'Avg GPA' },
-                grid: { drawOnChartArea: false },
-            },
-        },
+        return Object.keys(courseStats).map(courseCode => ({
+            CourseCode: courseCode,
+            CourseTitle: courseStats[courseCode].CourseTitle,
+            Appeared: courseStats[courseCode].appeared,
+            Passed: courseStats[courseCode].passed,
+            Failed: courseStats[courseCode].failed,
+            PassPercentage: courseStats[courseCode].passPercentage,
+            AvgGPA: courseStats[courseCode].avgGPA
+        }));
     };
 
     return (
@@ -170,42 +89,32 @@ const Table1 = ({ data }) => {
             {loading ? (
                 <p>Loading...</p>
             ) : (
-                <>
-                    <Table className="text-sm border-collapse border border-gray-200 w-full">
-                        <TableHeader>
-                            <TableRow className="bg-gray-100">
-                                <TableHead className="w-24 py-3 px-4">Subject Code</TableHead>
-                                <TableHead className="py-3 px-4">Subject Name</TableHead>
-                                <TableHead className="py-3 px-4">Appeared</TableHead>
-                                <TableHead className="py-3 px-4">Passed</TableHead>
-                                <TableHead className="py-3 px-4">Failed</TableHead>
-                                <TableHead className="w-24 py-3 px-4">Pass %</TableHead>
-                                <TableHead className="w-24 py-3 px-4">Avg GPA</TableHead>
+                <Table className="text-sm border-collapse border border-gray-200 w-full">
+                    <TableHeader>
+                        <TableRow className="bg-gray-100">
+                            <TableHead className="py-3 px-4">Subject Code</TableHead>
+                            <TableHead className="py-3 px-4">Subject Name</TableHead>
+                            <TableHead className="py-3 px-4">Appeared</TableHead>
+                            <TableHead className="py-3 px-4">Passed</TableHead>
+                            <TableHead className="py-3 px-4">Failed</TableHead>
+                            <TableHead className="py-3 px-4">Pass %</TableHead>
+                            <TableHead className="py-3 px-4">Avg GPA</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {statistics.map(stat => (
+                            <TableRow key={stat.CourseCode} className="bg-white">
+                                <TableCell className="py-3 px-4">{stat.CourseCode}</TableCell>
+                                <TableCell className="py-3 px-4">{stat.CourseTitle}</TableCell>
+                                <TableCell className="py-3 px-4">{stat.Appeared}</TableCell>
+                                <TableCell className="py-3 px-4">{stat.Passed}</TableCell>
+                                <TableCell className="py-3 px-4">{stat.Failed}</TableCell>
+                                <TableCell className="py-3 px-4">{stat.PassPercentage}</TableCell>
+                                <TableCell className="py-3 px-4">{stat.AvgGPA}</TableCell>
                             </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {statistics.map((statistic, index) => (
-                                <TableRow key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                                    <TableCell className="font-medium py-3 px-4">{statistic.CourseCode}</TableCell>
-                                    <TableCell className="py-3 px-4">{statistic.CourseTitle}</TableCell>
-                                    <TableCell className="py-3 px-4">{statistic.Appeared}</TableCell>
-                                    <TableCell className="py-3 px-4">{statistic.Passed}</TableCell>
-                                    <TableCell className="py-3 px-4">{statistic.Failed}</TableCell>
-                                    <TableCell className="text-right py-3 px-4">{statistic.PassPercentage}</TableCell>
-                                    <TableCell className="text-right py-3 px-4">{statistic.AvgGPA}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-
-                    
-                    <div className="my-8">
-                        <h2 className="text-lg font-bold mb-4">Line Chart</h2>
-                        <Line data={lineData} options={lineOptions} />
-                    </div>
-
-                   
-                </>
+                        ))}
+                    </TableBody>
+                </Table>
             )}
         </div>
     );

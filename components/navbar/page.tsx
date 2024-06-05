@@ -6,9 +6,9 @@ import {
     MdOutlineSpaceDashboard,
     MdOutlineAnalytics,
 } from "react-icons/md";
-import { AiOutlineStop } from "react-icons/ai";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image'; // Import Image component from next/image
 
 export default function Home() {
     const [active, setActive] = useState(false)
@@ -46,13 +46,16 @@ export default function Home() {
                 <div className="p-4 w-full space-y-6">
                     <div className="flex items-center justify-between">
                     <Link href="/">
-    <img
-      className={`
-        ${active ? 'block' : 'hidden'}
-      `}
-      src="/assets/logo.svg"
-    />
-</Link>
+                        <Image
+                            className={`
+                                ${active ? 'block' : 'hidden'}
+                            `}
+                            src="/assets/logo.svg"
+                            alt="Logo"
+                            width={200}
+                            height={200}
+                        />
+                    </Link>
                         <button className="p-3 rounded-xl hover:bg-light-green" onClick={toggleSidebar}>
                             <MenuIcon className="h-6 w-6" />
                         </button>
@@ -66,7 +69,7 @@ export default function Home() {
                             <span className={`
                 ml-3
                 ${active ? 'block' : 'hidden'}
-              `}>Dashboard</span>
+              `}>Student GradeBook</span>
                         </button>
 
 
@@ -79,20 +82,20 @@ export default function Home() {
                         </button>
 
                         <button className="flex w-full p-3 rounded-xl hover:bg-light-green" onClick={handleClick2}>
-                            <img className="h-6 w-6" src="/assets/user.svg" />
+                            <Image
+                                className="h-6 w-6"
+                                src="/assets/user.svg"
+                                alt="User Icon"
+                                width={24}
+                                height={24}
+                            />
                             <span className={`
                 ml-3
                 ${active ? 'block' : 'hidden'}
-              `}>NBA Records</span>
+              `}>BatchWise Analysis</span>
                         </button>
 
-                        <button className="flex w-full p-3 rounded-xl hover:bg-light-green" onClick={handleClick3}>
-                            <AiOutlineStop className="h-6 w-6" />
-                            <span className={`
-                ml-3
-                ${active ? 'block' : 'hidden'}
-              `}>BackLogs</span>
-                        </button>
+                       
                     </div>
                 </div>
             </aside>

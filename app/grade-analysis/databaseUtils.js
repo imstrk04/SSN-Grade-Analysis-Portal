@@ -1,6 +1,18 @@
-import { getDatabase, ref, get, child } from 'firebase/database';
+import { getDatabase, ref, get, child } from "firebase/database";
 
-export const fetchData = async (year, semester, section) => {
+export const fetchRollNumbers = async (year) => {
+  const db = ref(getDatabase());
+  const rollNumbersSnap = await get(child(db, 'student details'));
+  const rolls = Object.values(rollNumbersSnap.val());
+  
+  const rollNumbers = rolls
+    .filter(student => student.Batch === year)
+    .map(student => student.RegisterNo);
+
+    return rollNumbers;
+};
+
+export const fetchData = async (year, semester, rollNumberStart, rollNumberEnd) => {
     const dbRef = ref(getDatabase());
 
     console.log('Fetching data from the database...');
@@ -19,11 +31,13 @@ export const fetchData = async (year, semester, section) => {
     console.log('Result Details:', resultDetails);
 
     const filteredStudents = studentDetails.filter(student =>
-        student.Batch === year && (section === 'ALL' || student.Section === section)
+        student.Batch === year && 
+        student.RegisterNo >= rollNumberStart && 
+        student.RegisterNo <= rollNumberEnd
     );
 
     if (filteredStudents.length === 0) {
-        console.error('No students found for the specified batch year and section');
+        console.error('No students found for the specified batch year and roll number range');
         return [];
     }
 
@@ -51,7 +65,7 @@ export const fetchData = async (year, semester, section) => {
             filteredData.push({
                 RegisterNo: student.RegisterNo, 
                 CourseCode: result.CourseCode,
-                CourseTitle: courseTitleMap[result.CourseCode]|| "Unknown Course",
+                CourseTitle: courseTitleMap[result.CourseCode] || "Unknown Course",
                 Grade: result.Grade,
                 GradeCredit: courseCreditMap[result.CourseCode]
             });
@@ -74,5 +88,5 @@ export const getSemester = (year, semester) => {
     } else if (semMon === "May") {
         sem =  (semYear - startYear) * 2;
     }
-    return sem
+    return sem;
 };

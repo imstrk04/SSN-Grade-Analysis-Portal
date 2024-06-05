@@ -158,6 +158,7 @@ const CardMenu = () => {
           text-align: center;
         }
       `}</style>
+      
       <div className="container">
         <div className="brand-logo" />
         <h1 className="brand-title">Login Page</h1>

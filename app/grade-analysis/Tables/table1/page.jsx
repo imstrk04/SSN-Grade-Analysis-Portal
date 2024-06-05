@@ -1,19 +1,24 @@
-"use client";
+'use client'
 import React, { useState, useEffect } from "react";
 import Navbar from "@/app/grade-analysis/Navbar";
 import Table1 from "@/app/grade-analysis/Tables/table1";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/components/firebase/firebase.js";
 import { useRouter } from "next/navigation";
-import { fetchData } from "@/app/grade-analysis/databaseUtils";
+import {
+  fetchData,
+  fetchRollNumbers,
+} from "@/app/grade-analysis/databaseUtils";
 import Home from "@/components/navbar/page";
+import Spinner2 from "@/components/ui/spin2";
 
 const Table1Page = () => {
   const [user] = useAuthState(auth);
   const router = useRouter();
   const [year, setYear] = useState("");
   const [semester, setSemester] = useState("");
-  const [section, setSection] = useState("");
+  const [rollNumberStart, setRollNumberStart] = useState("");
+  const [rollNumberEnd, setRollNumberEnd] = useState("");
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -23,16 +28,38 @@ const Table1Page = () => {
     }
   }, [user, router]);
 
+  const handleSubmit = async () => {
+    setLoading(true);
+    const fetchedData = await fetchData(
+      year,
+      semester,
+      rollNumberStart,
+      rollNumberEnd
+    );
+    setData(fetchedData);
+    setTimeout(() => {
+      setLoading(false); // Set loading to false after 5 seconds
+    }, 2500);
+  };
+
+  useEffect(() => {
+    const fetchDefaultRollNumbers = async () => {
+      const rollNumbers = await fetchRollNumbers(year);
+      console.log(rollNumbers);
+      if (rollNumbers.length > 0) {
+        setRollNumberStart(Math.min(...rollNumbers).toString());
+        setRollNumberEnd(Math.max(...rollNumbers).toString());
+      }
+    };
+
+    if (year) {
+      fetchDefaultRollNumbers();
+    }
+  }, [year]);
+
   if (!user) {
     return null;
   }
-
-  const handleSubmit = async () => {
-    setLoading(true);
-    const fetchedData = await fetchData(year, semester, section);
-    setData(fetchedData);
-    setLoading(false);
-  };
 
   return (
     <>
@@ -54,15 +81,21 @@ const Table1Page = () => {
       <Navbar
         setYear={setYear}
         setSemester={setSemester}
-        setSection={setSection}
+        setRollNumberStart={setRollNumberStart}
+        setRollNumberEnd={setRollNumberEnd}
         handleSubmit={handleSubmit}
+        rollNumberStart={rollNumberStart}
+        rollNumberEnd={rollNumberEnd}
       />
+     
+
+
       <div className="flex">
         <Home />
         <div>
-          <h1>Table 1</h1>
+          
           {loading ? (
-            <p className="loading">Rendering...</p>
+            <Spinner2 />
           ) : data.length > 0 ? (
             <Table1 data={data} />
           ) : (
@@ -73,6 +106,7 @@ const Table1Page = () => {
           )}
         </div>
       </div>
+      
     </>
   );
 };

@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { getDatabase, ref, get, child, onValue } from 'firebase/database';
+import { getDatabase, ref, onValue } from 'firebase/database';
 import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-  } from "@/components/ui/select";
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
-const Navbar = ({ setYear, setSemester, setSection, handleSubmit }) => {
+const Navbar = ({ setYear, setSemester, setRollNumberStart, setRollNumberEnd, handleSubmit, rollNumberStart, rollNumberEnd }) => {
   const [batches, setBatches] = useState([]);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ const Navbar = ({ setYear, setSemester, setSection, handleSubmit }) => {
       <div className="max-w-7xl mx-auto flex items-center w-full px-2 lg:px-8">
         <h1 className="flex-shrink-0 mr-auto"></h1>
         <div className="flex items-center space-x-4">
-          <Select onValueChange={setYear}>
+          <Select onValueChange={(value) => { setYear(value); }}>
             <SelectTrigger className="w-full md:w-[200px] bg-white text-gray-800 rounded-md cursor-pointer">
               <SelectValue placeholder="Select academic year" />
             </SelectTrigger>
@@ -67,19 +67,21 @@ const Navbar = ({ setYear, setSemester, setSection, handleSubmit }) => {
               </SelectGroup>
             </SelectContent>
           </Select>
-          <Select onValueChange={setSection}>
-            <SelectTrigger className="w-40 md:w-[200px] bg-white text-gray-800 rounded-md cursor-pointer">
-              <SelectValue placeholder="Select Section" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="A">Section A</SelectItem>
-                <SelectItem value="B">Section B</SelectItem>
-                <SelectItem value="C">Section C</SelectItem>
-                <SelectItem value="ALL">Overall</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <input
+            type="text"
+            placeholder="Roll Number Start"
+            value={rollNumberStart}
+            onChange={(e) => setRollNumberStart(e.target.value)}
+            className="w-10 h-10 md:w-[200px] bg-white text-gray-800 rounded-md"
+          />
+          <p>--{">"}</p>
+          <input
+            type="text"
+            placeholder="Roll Number End"
+            value={rollNumberEnd}
+            onChange={(e) => setRollNumberEnd(e.target.value)}
+            className="w-10 h-10 md:w-[200px] bg-white text-gray-800 rounded-md"
+          />
           <Button
             onClick={handleSubmit}
             style={{

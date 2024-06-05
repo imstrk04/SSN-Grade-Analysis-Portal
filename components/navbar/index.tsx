@@ -1,12 +1,9 @@
 import Head from 'next/head'
 import { MenuIcon } from '@heroicons/react/outline'
 import { useState } from 'react'
-import {
-  MdOutlineSpaceDashboard,
-  MdOutlineAnalytics,
-} from "react-icons/md";
+import { MdOutlineSpaceDashboard, MdOutlineAnalytics } from "react-icons/md";
 import { AiOutlineStop } from "react-icons/ai";
-
+import Image from 'next/image'; // Import Image component from next/image
 
 export default function Home() {
   const [active, setActive] = useState(false)
@@ -30,10 +27,15 @@ export default function Home() {
       `}>
         <div className="p-4 w-full space-y-6">
           <div className="flex items-center justify-between">
-            <img className={`
-              ${active ? 'block' : 'hidden'}
-            `}
-              src="/assets/logo.svg" />
+            <Image
+              className={`
+                ${active ? 'block' : 'hidden'}
+              `}
+              src="/assets/logo.svg"
+              alt="Logo" // Add alt text for the logo image
+              width={64} // Adjust width and height based on your design
+              height={64}
+            />
             <button className="p-3 rounded-xl hover:bg-light-green" onClick={toggleSidebar}>
               <MenuIcon className="h-6 w-6" />
             </button>
@@ -49,7 +51,6 @@ export default function Home() {
               `}>Dashboard</span>
             </button>
 
-
             <button className="flex w-full p-3 rounded-xl hover:bg-light-green">
               <MdOutlineAnalytics className="h-6 w-6" />
               <span className={`
@@ -59,7 +60,13 @@ export default function Home() {
             </button>
 
             <button className="flex w-full p-3 rounded-xl hover:bg-light-green">
-              <img className="h-6 w-6" src="/assets/user.svg" />
+              <Image
+                className="h-6 w-6"
+                src="/assets/user.svg"
+                alt="User Icon" // Add alt text for the user icon image
+                width={24} // Adjust width and height based on your design
+                height={24}
+              />
               <span className={`
                 ml-3
                 ${active ? 'block' : 'hidden'}
@@ -77,8 +84,7 @@ export default function Home() {
         </div>
       </aside>
       <main className="flex flex-grow p-7 bg-body-bg-color">
-        <h2 className="font-semibold	">Dashboard</h2>
-
+        <h2 className="font-semibold">Dashboard</h2>
       </main>
     </div>
   )

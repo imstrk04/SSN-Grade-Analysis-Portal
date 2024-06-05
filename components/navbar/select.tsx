@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
-
+import { MdDeleteOutline } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import {
@@ -54,18 +54,12 @@ export function SelectDemo() {
     return (
 
         <>
-
             <div className="relative h-screen">
-
                 <div className="flex flex-col items-center justify-center">
                     <div className="bg-white inline-block">
                         <TypewriterEffect words={words} />
                     </div>
-
                 </div>
-
-
-
 
                 <div className="flex flex-col md:flex-row justify-center items-center h-full space-y-4 md:space-y-0 md:space-x-8">
                     <CardMenu />
@@ -98,6 +92,27 @@ export function SelectDemo() {
                                 <Button className='max-w-[150px] flex items-center'>
                                     <Pencil className='mr-2 h-4 w-4 md:h-6 md:w-6' />Add Results
                                 </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Do you want to Add New Semester Results?</AlertDialogTitle>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleContinue}>Continue</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
+                    <div style={{ marginLeft: '10px' }}>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+
+                                <Button >
+                                    <MdDeleteOutline className='text-3xl -ml-4' />
+                                    Delete Records
+                                </Button>
+
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>

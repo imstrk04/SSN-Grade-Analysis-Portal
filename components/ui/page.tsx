@@ -119,7 +119,7 @@ const CardMenu: React.FC = () => {
                     </div>
 
                     <div className="box">
-                        <Image src="/image/icon7.jpg" alt="" width={120} height={120} />
+                        <Image src="/image/icon7.png" alt="" width={120} height={120} />
                         <h3>Grade Analysis</h3>
                         <p>In-Depth Analyis Of Results</p>
                         <Button className="btn" onClick={handleContinue}>Click Here</Button>

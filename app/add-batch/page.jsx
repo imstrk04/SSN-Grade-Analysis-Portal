@@ -6,7 +6,7 @@ import * as XLSX from "xlsx";
 import { getDatabase, ref, update, get, push } from "firebase/database";
 import db from "@/components/firebase/firebase";
 import Home from "../../components/navbar/page";
-
+import Spinner3 from "../../components/ui/spin3";
 const ExcelUploader = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);

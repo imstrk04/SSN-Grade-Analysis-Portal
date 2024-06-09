@@ -1,3 +1,5 @@
+const EXCEL_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+import * as XLSX from 'xlsx';
 import React, { useEffect, useState } from "react";
 import {
   Table,
@@ -9,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { saveAs } from 'file-saver';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -61,6 +64,32 @@ const Table3 = ({ data }) => {
     };
   };
 
+  const downloadExcel = () => {
+    if (!courseData) return;
+  
+    // Convert courseData object to an array of objects
+    const dataArr = Object.keys(courseData).map((courseCode) => ({
+      CourseCode: courseCode,
+      CourseTitle: courseData[courseCode].CourseTitle,
+      O: courseData[courseCode].Grades["O"],
+      "A+": courseData[courseCode].Grades["A+"],
+      A: courseData[courseCode].Grades["A"],
+      "B+": courseData[courseCode].Grades["B+"],
+      B: courseData[courseCode].Grades["B"],
+      C: courseData[courseCode].Grades["C"],
+    }));
+  
+    const worksheet = XLSX.utils.json_to_sheet(dataArr);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Courses");
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  
+    // Save the excelBuffer as an Excel file
+    const blob = new Blob([excelBuffer], { type: EXCEL_TYPE });
+    saveAs(blob, "courses.xlsx");
+  };
+  
+
   return (
     <div>
       <Table className="text-sm border-collapse border border-gray-200 w-full">
@@ -108,6 +137,12 @@ const Table3 = ({ data }) => {
               </div>
             </div>
           ))}
+      </div>
+
+      <div className="flex justify-center">
+        <button onClick={downloadExcel} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          Download as Excel
+        </button>
       </div>
     </div>
   );

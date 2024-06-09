@@ -114,21 +114,21 @@ const CardMenu: React.FC = () => {
                     <div className="box">
                         <Image src="/image/icon0.png" alt="" width={120} height={120} />
                         <h3>Students Gradebook</h3>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus, commodi?</p>
+                        <p>CGPA, Rankings For Each Semester</p>
                         <Button className="btn" onClick={handleContinue3}>Click Here</Button>
                     </div>
 
                     <div className="box">
                         <Image src="/image/icon7.jpg" alt="" width={120} height={120} />
                         <h3>Grade Analysis</h3>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus, commodi?</p>
+                        <p>In-Depth Analyis Of Results</p>
                         <Button className="btn" onClick={handleContinue}>Click Here</Button>
                     </div>
 
                     <div className="box">
-                        <Image src="/image/icon8.png" alt="" width={150} height={150} />
+                        <Image src="/image/icon8.png" alt="" width={120} height={120} />
                         <h3>Batchwise Analysis</h3>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus, commodi?</p>
+                        <p>Students With No BackLogs</p>
                         <Button className="btn" onClick={handleContinue2}>Click Here</Button>
                     </div>
                 </div>

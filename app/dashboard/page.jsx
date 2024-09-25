@@ -1,111 +1,271 @@
-// 'use client';
-// import React, { useState, useEffect } from 'react';
+"use client";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import React, { useState, useEffect } from "react";
+import Navbar from "@/app/dashboard/Navbar";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@/components/firebase/firebase.js";
+import { useRouter } from "next/navigation";
+import { fetchData, fetchRollNumbers } from "@/app/dashboard/Fetch";
+import Spinner2 from "@/components/ui/spin2";
 
-// import FirebaseDataPage from '../../components/table/table';
-// import Home from '../../components/navbar/page';
-// import {
-//     Select,
-//     SelectContent,
-//     SelectGroup,
-//     SelectItem,
-//     SelectLabel,
-//     SelectTrigger,
-//     SelectValue,
-// } from "@/components/ui/select";
-// import { Button } from '@/components/ui/button';
-// import Image from "next/image";
-// import Link from 'next/link';
-// import { useAuthState } from 'react-firebase-hooks/auth';
-// import { auth } from '@/components/firebase/firebase';
-// import { useRouter } from 'next/navigation';
+const GradebookPage = () => {
+  const [user] = useAuthState(auth);
+  const router = useRouter();
+  const [year, setYear] = useState("");
+  const [semester, setSemester] = useState("");
+  const [rollNumberStart, setRollNumberStart] = useState("");
+  const [rollNumberEnd, setRollNumberEnd] = useState("");
+  const [data, setData] = useState({});
+  const [loading, setLoading] = useState(false);
 
-// export default function Navbar() {
-//     const [batch, setBatch] = useState('');
-//     const [semester, setSemester] = useState('');
-//     const [section, setSection] = useState('');
-//     const [user] = useAuthState(auth);
-//     const router = useRouter();
+  useEffect(() => {
+    if (!user) {
+      router.push("/sign-in");
+    }
+  }, [user, router]);
 
-//     useEffect(() => {
-//         if (!user) {
-//             router.push('/sign-in');
-//         }
-//     }, [user, router]);
+  const handleSubmit = async () => {
+    setLoading(true);
+    const fetchedData = await fetchData(
+      year,
+      semester,
+      rollNumberStart,
+      rollNumberEnd
+    );
+    setData(fetchedData);
+    setLoading(false);
+  };
 
-//     if (!user) {
-//         return null; // Or you can return a loading indicator or a message
-//     }
+  useEffect(() => {
+    const fetchDefaultRollNumbers = async () => {
+      const rollNumbers = await fetchRollNumbers(year);
+      if (rollNumbers.length > 0) {
+        setRollNumberStart(Math.min(...rollNumbers).toString());
+        setRollNumberEnd(Math.max(...rollNumbers).toString());
+      }
+    };
 
-//     const handleSubmit = () => {
-//         console.log('Batch:', batch);
-//         console.log('Semester:', semester);
-//         console.log('Section:', section);
-//     };
+    if (year) {
+      fetchDefaultRollNumbers();
+    }
+  }, [year]);
 
-//     return (
-//         <>
-//             <nav className="bg-blue-500 p-6 shadow-md w-full flex justify-between items-center">
-//                 <div style={{ marginTop: '5px' }}>
-//                     <Link href="/">
-//                         <Image src="/assets/logo2.svg" alt="Logo" width={100} height={100} />
-//                     </Link>
-//                 </div>
-//                 <div className="max-w-7xl mx-auto flex items-center w-full px-2 lg:px-8">
-//                     <h1 className="flex-shrink-0 mr-auto"> </h1>
-//                     <div className="flex items-center space-x-4">
-//                         <Select onValueChange={(value) => setSelectedAcademicYear(value)}>
-//                             <SelectTrigger className="w-full md:w-[200px] bg-white text-gray-800 rounded-md cursor-pointer">
-//                                 <SelectValue placeholder="Select academic year" />
-//                             </SelectTrigger>
-//                             <SelectContent>
-//                                 <SelectGroup>
-//                                     <SelectLabel>Academic Year</SelectLabel>
-//                                     <SelectItem value="2022-2023">2022-2026</SelectItem>
-//                                     <SelectItem value="2023-2024">2023-2027</SelectItem>
-//                                 </SelectGroup>
-//                             </SelectContent>
-//                         </Select>
-//                         <Select onValueChange={(value) => setSelectedSemester(value)}>
-//                             <SelectTrigger className="w-full md:w-[200px] bg-white text-gray-800 rounded-md cursor-pointer">
-//                                 <SelectValue placeholder="Select semester" />
-//                             </SelectTrigger>
-//                             <SelectContent>
-//                                 <SelectGroup>
-//                                     <SelectLabel>Semester</SelectLabel>
-//                                     <SelectItem value="Semester 1">Semester 1</SelectItem>
-//                                     <SelectItem value="Semester 2">Semester 2</SelectItem>
-//                                     <SelectItem value="Semester 3">Semester 3</SelectItem>
-//                                     <SelectItem value="Semester 4">Semester 4</SelectItem>
-//                                     <SelectItem value="Semester 5">Semester 5</SelectItem>
-//                                     <SelectItem value="Semester 6">Semester 6</SelectItem>
-//                                     <SelectItem value="Semester 7">Semester 7</SelectItem>
-//                                     <SelectItem value="Semester 8">Semester 8</SelectItem>
-//                                 </SelectGroup>
-//                             </SelectContent>
-//                         </Select>
-//                         <Select onValueChange={setSection}>
-//                             <SelectTrigger className="w-full md:w-[200px] bg-white text-gray-800 rounded-md cursor-pointer">
-//                                 <SelectValue placeholder="Select section" />
-//                             </SelectTrigger>
-//                             <SelectContent>
-//                                 <SelectGroup>
-//                                     <SelectLabel>Section</SelectLabel>
-//                                     <SelectItem value="A">A</SelectItem>
-//                                     <SelectItem value="B">B</SelectItem>
-//                                     <SelectItem value="C">C</SelectItem>
-//                                 </SelectGroup>
-//                             </SelectContent>
-//                         </Select>
-//                         <Button onClick={handleSubmit} style={{ backgroundColor: '#1800f0', borderColor: '#1800f0' }} className="text-white hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition duration-150 ease-in-out">
-//                             Submit
-//                         </Button>
-//                     </div>
-//                 </div>
-//             </nav>
-//             <div className="flex flex-col md:flex-row gap-0">
-//                 <Home />
-//                 <FirebaseDataPage />
-//             </div>
-//         </>
-//     );
-// }
+  if (!user) {
+    return null;
+  }
+
+  const calculateGPA = (grades) => {
+    if (!grades || Object.keys(grades).length === 0)
+      return { gpa: 0, gradePoints: 0 };
+
+    const gradePoints = {
+      O: 10,
+      "A+": 9,
+      A: 8,
+      "B+": 7,
+      B: 6,
+      C: 5,
+      U: 0,
+      R: 0,
+      RA: 0,
+    };
+
+    let totalGradePoints = 0;
+    let totalCredits = 0;
+
+    for (const course in grades) {
+      const grade = grades[course][0];
+      const credit = grades[course][1] || 0;
+      if (grade !== "-") {
+        totalGradePoints += gradePoints[grade] * credit;
+        totalCredits += credit;
+      }
+    }
+
+    const gpa = totalCredits > 0 ? totalGradePoints / totalCredits : 0;
+    return {
+      gradePoints: totalGradePoints,
+      gpa: gpa.toFixed(2),
+    };
+  };
+
+  const calculateDeviation = (gpa, averageGPA) => {
+    return (gpa - averageGPA).toFixed(2);
+  };
+
+  const calculateRanking = (gpa, allGPAs) => {
+    const sortedGPAs = allGPAs.sort((a, b) => b - a);
+    const index = sortedGPAs.indexOf(gpa);
+    return index + 1;
+  };
+
+  const getAverageGPA = () => {
+    const validGPAs = Object.values(data)
+      .map(([_, grades]) => parseFloat(calculateGPA(grades).gpa))
+      .filter((gpa) => !isNaN(gpa) && gpa > 0);
+
+    const totalGPA = validGPAs.reduce((acc, gpa) => acc + gpa, 0);
+
+    return validGPAs.length > 0 ? totalGPA / validGPAs.length : 0;
+  };
+
+  const averageGPA = getAverageGPA();
+
+  return (
+    <>
+      <style jsx>{`
+        .table-container {
+          position: relative;
+          max-height: 600px; /* Set the maximum height of the container */
+          overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        .table-header {
+          position: sticky;
+          top: 0;
+          background-color: white; /* Background color of the header */
+          z-index: 1;
+        }
+
+        .fixed-header {
+          position: sticky;
+          top: 0;
+          background-color: white; /* Background color of the header */
+          z-index: 2;
+        }
+
+        .fixed-cell {
+          position: sticky;
+          right: 0;
+          background-color: white; /* Background color of the cell */
+          z-index: 1;
+        }
+
+        .no-data {
+          text-align: center;
+        }
+
+        .text-right {
+          text-align: right;
+        }
+      `}</style>
+      <Navbar
+        setYear={setYear}
+        setSemester={setSemester}
+        setRollNumberStart={setRollNumberStart}
+        setRollNumberEnd={setRollNumberEnd}
+        handleSubmit={handleSubmit}
+        rollNumberStart={rollNumberStart}
+        rollNumberEnd={rollNumberEnd}
+      />
+
+      {loading ? (
+        <div className="loading">
+          <Spinner2 />
+        </div>
+      ) : (
+        <div className="table-container">
+          <Table>
+            <TableCaption>
+              A list of student grades and performance metrics.
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">S.No</TableHead>
+                <TableHead>Register Number</TableHead>
+                <TableHead>Name</TableHead>
+                {Object.keys(data).length > 0 &&
+                data[Object.keys(data)[0]][1] ? (
+                  Object.keys(data[Object.keys(data)[0]][1]).map(
+                    (courseCode, index) => (
+                      <TableHead key={index}>{courseCode}</TableHead>
+                    )
+                  )
+                ) : (
+                  <TableHead>No grades available</TableHead>
+                )}
+                <TableHead className="fixed-header">GPA</TableHead>
+                <TableHead className="fixed-header">Grade Points</TableHead>
+                <TableHead className="fixed-header">Deviation</TableHead>
+                <TableHead className="fixed-header">Ranking</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Object.keys(data).length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan="8" className="no-data">
+                    No data available
+                  </TableCell>
+                </TableRow>
+              ) : (
+                Object.entries(data)
+                  .filter(([_, [__, grades]]) => Object.keys(grades).length > 0)
+                  .map(([registerNo, [name, grades]], index) => {
+                    const { gpa, gradePoints } = calculateGPA(grades);
+                    const validGPAs = Object.values(data)
+                      .map(([_, grades]) =>
+                        parseFloat(calculateGPA(grades).gpa)
+                      )
+                      .filter((gpa) => !isNaN(gpa) && gpa > 0);
+                    const deviation = calculateDeviation(
+                      parseFloat(gpa),
+                      averageGPA
+                    );
+                    const ranking = calculateRanking(
+                      parseFloat(gpa),
+                      validGPAs
+                    );
+                    return (
+                      <TableRow key={registerNo}>
+                        <TableCell className="font-medium">
+                          {index + 1}
+                        </TableCell>
+                        <TableCell>{registerNo}</TableCell>
+                        <TableCell>{name}</TableCell>
+                        {grades ? (
+                          Object.entries(grades).map(
+                            ([courseCode, grade], i) => (
+                              <TableCell key={i}>{grade[0]}</TableCell>
+                            )
+                          )
+                        ) : (
+                          <TableCell>No grades available</TableCell>
+                        )}
+                        <TableCell className="fixed-cell">{gpa}</TableCell>
+                        <TableCell className="fixed-cell">
+                          {gradePoints}
+                        </TableCell>
+                        <TableCell className="fixed-cell">
+                          {deviation}
+                        </TableCell>
+                        <TableCell className="fixed-cell">{ranking}</TableCell>
+                      </TableRow>
+                    );
+                  })
+              )}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={7}>Total Students</TableCell>
+                <TableCell className="text-right">
+                  {Object.keys(data).length}
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default GradebookPage;

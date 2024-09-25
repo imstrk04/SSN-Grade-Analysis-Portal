@@ -6,7 +6,7 @@ import { auth } from '@/components/firebase/firebase.js';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from 'framer-motion';
 import Spinner1 from '@/components/ui/spin1';
 
 const IndexPage: React.FC = () => {
